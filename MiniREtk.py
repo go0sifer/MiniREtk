@@ -8,9 +8,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = '/home/go0se/uploads'
-ARCHIVE_FOLDER = '/home/go0se/archive'
-REPORTS_FOLDER = '/home/go0se/reports'
+UPLOAD_FOLDER = '/home/user/uploads'
+ARCHIVE_FOLDER = '/home/user/archive'
+REPORTS_FOLDER = '/home/user/reports'
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(ARCHIVE_FOLDER, exist_ok=True)
@@ -23,7 +23,7 @@ HTML_TEMPLATE = '''
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mini Analyzer with Reports</title>
+    <title>Mini REtk Analyzer</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
         body {
@@ -232,7 +232,7 @@ HTML_TEMPLATE = '''
                 </a>
             {% endif %}
         </div>
-        <h1>Mini Analyzer</h1>
+        <h1>Mini REtk Analyzer</h1>
         {% if not archive and not reports %}
         <form class="upload-form" method="post" enctype="multipart/form-data">
             <input type="file" name="file" required>
@@ -484,11 +484,11 @@ def report_file(filename):
 
 @app.route('/logo.jpg')
 def logo():
-    return send_from_directory('/home/go0se', 'logo.jpg')
+    return send_from_directory('/home/user', 'logo.jpg')
 
 @app.route('/background.jpg')
 def background():
-    return send_from_directory('/home/go0se', 'background.jpg')
+    return send_from_directory('/home/user', 'background.jpg')
 
 @app.route('/run/<script>/<filename>', methods=['POST'])
 def run_script(script, filename):
@@ -498,9 +498,9 @@ def run_script(script, filename):
 
     output = None
     if script == 'pdfid':
-        command = f'python3 /home/go0se/pdfid.py "{filepath}"'
+        command = f'python3 /home/user/pdfid.py "{filepath}"'
     elif script == 'pdfparser':
-        command = f'python3 /home/go0se/pdf-parser.py "{filepath}"'
+        command = f'python3 /home/user/pdf-parser.py "{filepath}"'
     elif script == 'exiftool':
         command = f'{EXIFTOOL_PATH} "{filepath}"'
     elif script == 'filecmd':

@@ -5,7 +5,7 @@
 set -e
 
 # ====== USER CONFIG =======
-USERNAME="user"  # <-- CHANGE THIS TO YOUR USERNAME IF DIFFERENT
+USERNAME="go0se"
 PROJECT_DIR="/home/$USERNAME"
 APP_SCRIPT="app.py"
 PDFID_SCRIPT="pdfid.py"
@@ -22,7 +22,7 @@ sudo apt update && sudo apt upgrade -y
 
 # 2. Install required packages
 echo "[*] Installing Python, Flask, and forensic tools..."
-sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git
+sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git dos2unix
 
 # 3. Create project directories
 echo "[*] Creating project directories..."
@@ -33,8 +33,11 @@ echo "[*] Please copy your $APP_SCRIPT, $PDFID_SCRIPT, $PDFPARSER_SCRIPT, $LOGO_
 echo "    You can use scp or any other method."
 read -p "Press Enter to continue after copying the files..."
 
-# 5. Make scripts executable
-chmod +x "$PROJECT_DIR/$PDFID_SCRIPT" "$PROJECT_DIR/$PDFPARSER_SCRIPT" || true
+# 5. Convert line endings and make scripts executable
+echo "[*] Converting line endings and setting executable permissions..."
+cd "$PROJECT_DIR"
+dos2unix "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
+chmod +x "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
 
 # 6. Set up systemd service
 echo "[*] Setting up systemd service..."
@@ -60,13 +63,14 @@ sudo systemctl restart miniretk-analyzer
 
 echo "[*] Mini REtk Analyzer service installed and started."
 
-# 7. Install and configure AutoHotspot
-echo "[*] Installing AutoHotspot for fallback WiFi access point..."
+# 7. Install and configure AutoHotspot (GitHub method)
+echo "[*] Installing AutoHotspot for fallback WiFi access point from GitHub..."
 cd "$PROJECT_DIR"
 if [ ! -d AutoHotspot-Installer ]; then
     git clone https://github.com/RaspberryConnect/AutoHotspot-Installer.git
 fi
-cd AutoHotspot-Installer
+cd AutoHotspot-Installer/AutoHotspot-Setup/Autohotspot
+sudo chmod +x autohotspot-setup.sh
 sudo ./autohotspot-setup.sh
 
 echo "[*] AutoHotspot installed. You can edit /etc/hostapd/hostapd.conf to change SSID and password if desired."

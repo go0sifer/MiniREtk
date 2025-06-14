@@ -29,3 +29,6 @@
 2. **Analyze:** Click any tool button to run an analysis. Output is shown on-screen and appended to the report (deduplicated).
 3. **Archive/Unarchive:** Move files in/out of the archive as needed.
 4. **Reports:** Download or view detailed per-file reports at any time.
+
+## **Deploy**
+ - If you want to run MiniREtk see delpoyMiniREtk.sh. You'll have to go get pdfid.py and pdf-parser.py on your own.

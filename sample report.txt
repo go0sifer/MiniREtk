@@ -1,0 +1,421 @@
+=== REPORT FOR: pdf-doc-vba-eicar-dropper.pdf ===
+MD5:     a1ddc9ebe19a3d43ec25889085ad3ed8
+SHA1:    0fa681a24df1b6ee6960bf1098af9689cfb8a576
+SHA256:  86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+SHA512:  f55d0493f7b09b550368d6547952eb1e811a9d1316aeaf6a68657eddb907a370a6c03861a47d9156000581efe97c06a170d5589629893b0c7daf35a7d1221f23
+File size: 10381 bytes (10.1 KB)
+MIME type: application/pdf
+Extension: .pdf
+Entropy: 7.8730
+Original upload path: /home/go0se/uploads/pdf-doc-vba-eicar-dropper.pdf
+VirusTotal: https://www.virustotal.com/gui/file/86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+First Analysis: 2025-06-14 18:22:07
+========================================
+
+--- 2025-06-14 18:22:07 ---
+SCRIPT: filecmd
+FILE: pdf-doc-vba-eicar-dropper.pdf
+HASH: 86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+---
+/home/go0se/uploads/pdf-doc-vba-eicar-dropper.pdf: PDF document, version 1.1, 0 pages
+
+
+--- 2025-06-14 18:22:11 ---
+SCRIPT: exiftool
+FILE: pdf-doc-vba-eicar-dropper.pdf
+HASH: 86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+---
+ExifTool Version Number         : 12.57
+File Name                       : pdf-doc-vba-eicar-dropper.pdf
+Directory                       : /home/go0se/uploads
+File Size                       : 10 kB
+File Modification Date/Time     : 2025:06:14 17:43:56+01:00
+File Access Date/Time           : 2025:06:14 17:43:56+01:00
+File Inode Change Date/Time     : 2025:06:14 17:43:56+01:00
+File Permissions                : -rw-r--r--
+File Type                       : PDF
+File Type Extension             : pdf
+MIME Type                       : application/pdf
+PDF Version                     : 1.1
+Linearized                      : No
+Page Count                      : 1
+
+
+--- 2025-06-14 18:22:14 ---
+SCRIPT: pdfid
+FILE: pdf-doc-vba-eicar-dropper.pdf
+HASH: 86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+---
+PDFiD 0.2.10 /home/go0se/uploads/pdf-doc-vba-eicar-dropper.pdf
+ PDF Header: %PDF-1.1
+ obj                    9
+ endobj                 9
+ stream                 2
+ endstream              2
+ xref                   1
+ trailer                1
+ startxref              1
+ /Page                  1
+ /Encrypt               0
+ /ObjStm                0
+ /JS                    1
+ /JavaScript            1
+ /AA                    0
+ /OpenAction            1
+ /AcroForm              0
+ /JBIG2Decode           0
+ /RichMedia             0
+ /Launch                0
+ /EmbeddedFile          1
+ /XFA                   0
+ /URI                   0
+ /Colors > 2^24         0
+
+
+
+--- 2025-06-14 18:22:18 ---
+SCRIPT: pdfparser
+FILE: pdf-doc-vba-eicar-dropper.pdf
+HASH: 86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+---
+PDF Comment '%PDF-1.1\r\n'
+
+PDF Comment '%\xd0\xd0\xd0\xd0\r\n'
+
+obj 1 0
+ Type: /Catalog
+ Referencing: 2 0 R, 3 0 R, 7 0 R, 9 0 R
+
+  <<
+    /Type /Catalog
+    /Outlines 2 0 R
+    /Pages 3 0 R
+    /Names
+      <<
+        /EmbeddedFiles
+          <<
+            /Names [(eicar-dropper.doc) 7 0 R]
+          >>
+      >>
+    /OpenAction 9 0 R
+  >>
+
+
+obj 2 0
+ Type: /Outlines
+ Referencing: 
+
+  <<
+    /Type /Outlines
+    /Count 0
+  >>
+
+
+obj 3 0
+ Type: /Pages
+ Referencing: 4 0 R
+
+  <<
+    /Type /Pages
+    /Kids [4 0 R]
+    /Count 1
+  >>
+
+
+obj 4 0
+ Type: /Page
+ Referencing: 3 0 R, 5 0 R, 6 0 R
+
+  <<
+    /Type /Page
+    /Parent 3 0 R
+    /MediaBox [0 0 612 792]
+    /Contents 5 0 R
+    /Resources
+      <<
+        /ProcSet [/PDF /Text]
+        /Font
+          <<
+            /F1 6 0 R
+          >>
+      >>
+  >>
+
+
+obj 5 0
+ Type: 
+ Referencing: 
+ Contains stream
+
+  <<
+    /Length 116
+  >>
+
+
+obj 6 0
+ Type: /Font
+ Referencing: 
+
+  <<
+    /Type /Font
+    /Subtype /Type1
+    /Name /F1
+    /BaseFont /Helvetica
+    /Encoding /MacRomanEncoding
+  >>
+
+
+obj 7 0
+ Type: /Filespec
+ Referencing: 8 0 R
+
+  <<
+    /Type /Filespec
+    /F (eicar-dropper.doc)
+    /EF
+      <<
+        /F 8 0 R
+      >>
+  >>
+
+
+obj 8 0
+ Type: /EmbeddedFile
+ Referencing: 
+ Contains stream
+
+  <<
+    /Length 8952
+    /Filter /FlateDecode
+    /Type /EmbeddedFile
+  >>
+
+
+obj 9 0
+ Type: /Action
+ Referencing: 
+
+  <<
+    /Type /Action
+    /S /JavaScript
+    /JS (this.exportDataObject({ cName: "eicar-dropper.doc", nLaunch: 2 });)
+  >>
+
+
+xref
+
+trailer
+  <<
+    /Size 10
+    /Root 1 0 R
+  >>
+
+startxref 10102
+
+PDF Comment '%%EOF\r\n'
+
+
+
+--- 2025-06-14 18:22:22 ---
+SCRIPT: strings
+FILE: pdf-doc-vba-eicar-dropper.pdf
+HASH: 86a96ec03ba8242c1486456d67ee17f919128754846dbb3bdf5e836059091dba
+---
+%PDF-1.1
+1 0 obj
+ /Type /Catalog
+ /Outlines 2 0 R
+ /Pages 3 0 R
+ /Names << /EmbeddedFiles << /Names [(eicar-dropper.doc) 7 0 R] >> >>
+ /OpenAction 9 0 R
+endobj
+2 0 obj
+ /Type /Outlines
+ /Count 0
+endobj
+3 0 obj
+ /Type /Pages
+ /Kids [4 0 R]
+ /Count 1
+endobj
+4 0 obj
+ /Type /Page
+ /Parent 3 0 R
+ /MediaBox [0 0 612 792]
+ /Contents 5 0 R
+ /Resources <<
+             /ProcSet [/PDF /Text]
+             /Font << /F1 6 0 R >>
+            >>
+endobj
+5 0 obj
+<< /Length 116 >>
+stream
+BT /F1 12 Tf 70 700 Td 15 TL (PDF file containing DOC file with VBA EICAR dropper. Created by Didier Stevens.) Tj ET
+endstream
+endobj
+6 0 obj
+ /Type /Font
+ /Subtype /Type1
+ /Name /F1
+ /BaseFont /Helvetica
+ /Encoding /MacRomanEncoding
+endobj
+7 0 obj
+ /Type /Filespec
+ /F (eicar-dropper.doc)
+ /EF << /F 8 0 R >>
+endobj
+8 0 obj
+ /Length 8952
+ /Filter /FlateDecode
+ /Type /EmbeddedFile
+stream
+"$a*
+hH0	
+RW[GEm
+Qm+d
+*]l?
+S9B/
+wAn 
+7jy`:	Y
+fQ]z
+f(i:
+lt4a
+mI.}
+lyhi}
+J0c[
+kW~u
+Syx/
+46t]
+dt1`j
+6h6~
+}H4V
+Ku8H
+c/N^5
+<Ws<d
+\H>b
+?*z^
+>Vx	.
+~v{m
+109G
+v[J_
+ wer
+Mziza
+n_;:oK
+[v(n
+ou]2!2
+%Y?;=
+}.-~
+gZTh
+[wzuw
+vv/Y
+uXvo
+/.^r
+yU	g
+@*..^U1
+cK7eK"Z
+m[)o
+vWlX:
+=:,=
+	?(t
+FKFo
+U;Ew
+_]9f
+.>{m/8uNIn
+6z6b=<3
+olf^
+uU'x
+jChd
+<g6g
+[[5[$
+&Z4Ac
+IH@o
+CCMy
+"c]d
+aJP#`#
+65b*
+k`-N W\j
+D4r/
+xK",
+tr|dS
+to3^
+7pF4
+AkDPWP
+^rj"
+0d!%R<W
+h@|Q
+f2cNE
+0{I9R
+vH7j
+u-2(
++8t%
+s8t1
+Mrh1
++9t9
+s8t1
+Z}AH
+Cx$@
+hz3h
+({q_
+WbnX?
+X{0e
+Mr)H
+\RQb6
+ImBll
+H?Vk4
+7m"!
+<9L({D
+<>["
+z	|;
+Ng|d
+|k(L
+xRT'YeX
+~6JD
+Zf.U2
+Q5Q5
+_mmg
+pbkJ
+#CEl
+6C|2
+v'^o
+0q0H
+qGqG
+oF<-g
+t !2N,S
+~ S*
+FXiY:Y
+"A^E
+2<8B
+0IXp
+)$it
+2"<R"
+X!QaL
+X!VEI$b
+*VWJ
+qxfKFE
+endstream
+endobj
+9 0 obj
+ /Type /Action
+ /S /JavaScript
+ /JS (this.exportDataObject({ cName: "eicar-dropper.doc", nLaunch: 2 });)
+endobj
+xref
+0 10
+0000000000 65535 f
+0000000019 00000 n
+0000000187 00000 n
+0000000243 00000 n
+0000000312 00000 n
+0000000517 00000 n
+0000000692 00000 n
+0000000816 00000 n
+0000000907 00000 n
+0000009967 00000 n
+trailer
+ /Size 10
+ /Root 1 0 R
+startxref
+10102
+%%EOF

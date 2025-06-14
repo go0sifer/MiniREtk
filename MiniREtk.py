@@ -1,3 +1,16 @@
+# ====== USER CONFIG =======
+USERNAME = "go0se"
+PROJECT_DIR = f"/home/{USERNAME}"
+UPLOAD_FOLDER = f"{PROJECT_DIR}/uploads"
+ARCHIVE_FOLDER = f"{PROJECT_DIR}/archive"
+REPORTS_FOLDER = f"{PROJECT_DIR}/reports"
+LOGO_PATH = f"{PROJECT_DIR}/logo.jpg"
+BG_PATH = f"{PROJECT_DIR}/background.jpg"
+PDFID_PATH = f"{PROJECT_DIR}/pdfid.py"
+PDFPARSER_PATH = f"{PROJECT_DIR}/pdf-parser.py"
+EXIFTOOL_PATH = 'exiftool'
+# ==========================
+
 from flask import Flask, request, render_template_string, redirect, url_for, send_from_directory
 import os
 import subprocess
@@ -8,15 +21,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = '/home/user/uploads'
-ARCHIVE_FOLDER = '/home/user/archive'
-REPORTS_FOLDER = '/home/user/reports'
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(ARCHIVE_FOLDER, exist_ok=True)
 os.makedirs(REPORTS_FOLDER, exist_ok=True)
-
-EXIFTOOL_PATH = 'exiftool'
 
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
@@ -484,11 +491,11 @@ def report_file(filename):
 
 @app.route('/logo.jpg')
 def logo():
-    return send_from_directory('/home/user', 'logo.jpg')
+    return send_from_directory(PROJECT_DIR, 'logo.jpg')
 
 @app.route('/background.jpg')
 def background():
-    return send_from_directory('/home/user', 'background.jpg')
+    return send_from_directory(PROJECT_DIR, 'background.jpg')
 
 @app.route('/run/<script>/<filename>', methods=['POST'])
 def run_script(script, filename):
@@ -498,9 +505,9 @@ def run_script(script, filename):
 
     output = None
     if script == 'pdfid':
-        command = f'python3 /home/user/pdfid.py "{filepath}"'
+        command = f'python3 {PDFID_PATH} "{filepath}"'
     elif script == 'pdfparser':
-        command = f'python3 /home/user/pdf-parser.py "{filepath}"'
+        command = f'python3 {PDFPARSER_PATH} "{filepath}"'
     elif script == 'exiftool':
         command = f'{EXIFTOOL_PATH} "{filepath}"'
     elif script == 'filecmd':

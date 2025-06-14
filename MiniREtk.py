@@ -1,0 +1,586 @@
+from flask import Flask, request, render_template_string, redirect, url_for, send_from_directory
+import os
+import subprocess
+import hashlib
+import shutil
+import math
+from datetime import datetime
+
+app = Flask(__name__)
+
+UPLOAD_FOLDER = '/home/go0se/uploads'
+ARCHIVE_FOLDER = '/home/go0se/archive'
+REPORTS_FOLDER = '/home/go0se/reports'
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(ARCHIVE_FOLDER, exist_ok=True)
+os.makedirs(REPORTS_FOLDER, exist_ok=True)
+
+EXIFTOOL_PATH = 'exiftool'
+
+HTML_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Analyzer with Reports</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: url('/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #f3f3f3;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto 0 auto;
+            background: rgba(30, 30, 48, 0.97);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 32px 36px 36px 36px;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 20px auto;
+            width: 120px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #0008;
+        }
+        .top-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+        .top-buttons a {
+            margin-left: 8px;
+        }
+        .top-btn, .archive-btn, .reports-btn {
+            background: linear-gradient(90deg, #fbc2eb 0%, #a18cd1 100%);
+            color: #232323;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0004;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .top-btn:hover, .archive-btn:hover, .reports-btn:hover {
+            background: linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%);
+            color: #232323;
+            text-decoration: none;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        h2 {
+            margin-top: 36px;
+            font-weight: 700;
+            color: #d1c4e9;
+        }
+        form.upload-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        input[type="file"] {
+            color: #fff;
+        }
+        input[type="submit"], button, .icon-btn-link, .hash-btn {
+            background: linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%);
+            color: #232323;
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: box-shadow 0.2s, background 0.2s;
+            box-shadow: 0 2px 8px #0004;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            min-width: 38px;
+            min-height: 38px;
+        }
+        input[type="submit"]:hover, button:hover, .icon-btn-link:hover, .hash-btn:hover {
+            background: linear-gradient(90deg, #fbc2eb 0%, #a18cd1 100%);
+            box-shadow: 0 4px 16px #0006;
+            color: #232323;
+            text-decoration: none;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: rgba(255,255,255,0.04);
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        li a.filename-link {
+            color: #b39ddb;
+            font-weight: 600;
+            text-decoration: none;
+            margin-right: 18px;
+            flex-grow: 1;
+            word-break: break-all;
+        }
+        li a.filename-link:hover {
+            text-decoration: underline;
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .icon-btn {
+            width: 22px;
+            height: 22px;
+            vertical-align: middle;
+            display: block;
+            margin: 0;
+        }
+        .hash-btn {
+            min-width: 38px;
+            min-height: 38px;
+            padding: 8px;
+            background: #fffde7;
+            color: #232323;
+            border: 2px solid #a18cd1;
+            font-size: 0.9rem;
+            font-family: monospace;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-left: 8px;
+            text-decoration: none;
+        }
+        .hash-btn:hover {
+            background: #fbc2eb;
+            color: #232323;
+            border: 2px solid #b39ddb;
+        }
+        pre {
+            background: #23233a;
+            color: #fffde7;
+            border-radius: 8px;
+            padding: 18px;
+            margin-top: 20px;
+            overflow-x: auto;
+            font-size: 1em;
+        }
+        @media (max-width: 900px) {
+            .container { padding: 10px; }
+            li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .button-group {
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/logo.jpg" class="logo" alt="Logo">
+        <div class="top-buttons">
+            {% if not archive and not reports %}
+                <a href="/archive" class="archive-btn" title="View Archive">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    Archive
+                </a>
+                <a href="/reports" class="reports-btn" title="View Reports">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/><text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">R</text></svg>
+                    Reports
+                </a>
+            {% elif archive %}
+                <a href="/" class="top-btn" title="Back to Analysis">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    Back
+                </a>
+                <a href="/reports" class="reports-btn" title="View Reports">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/><text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">R</text></svg>
+                    Reports
+                </a>
+            {% elif reports %}
+                <a href="/" class="top-btn" title="Back to Analysis">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    Back
+                </a>
+                <a href="/archive" class="archive-btn" title="View Archive">
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    Archive
+                </a>
+            {% endif %}
+        </div>
+        <h1>Mini Analyzer</h1>
+        {% if not archive and not reports %}
+        <form class="upload-form" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <input type="submit" value="Upload">
+        </form>
+        {% endif %}
+        <h2>
+            {% if archive %}
+                Archived Files
+            {% elif reports %}
+                Reports
+            {% else %}
+                Uploaded Files
+            {% endif %}
+        </h2>
+        <ul>
+        {% for file in files %}
+            <li>
+                {% if reports %}
+                    <a class="filename-link" href="/reportsfile/{{file}}" target="_blank">{{file}}</a>
+                    <a class="icon-btn-link" href="/reportsfile/{{file}}" download title="Download Report">
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M5 20h14a1 1 0 0 0 1-1v-4h-2v3H6v-3H4v4a1 1 0 0 0 1 1zm7-2V4h-2v14l-5-5-1.41 1.41L12 22l7.41-7.41L18 14l-5 5z"/></svg>
+                    </a>
+                {% elif archive %}
+                    <a class="filename-link" href="/archivefile/{{file}}" target="_blank">{{file}}</a>
+                {% else %}
+                    <a class="filename-link" href="/uploads/{{file}}" target="_blank">{{file}}</a>
+                {% endif %}
+                <div class="button-group">
+                {% if not archive and not reports and file.lower().endswith('.pdf') %}
+                    <form style="display:inline;" method="post" action="/run/pdfid/{{file}}">
+                        <button type="submit" title="Run pdfid.py">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" stroke="#232323" stroke-width="2" fill="none"/><line x1="15" y1="15" x2="21" y2="21" stroke="#232323" stroke-width="2"/></svg>
+                        </button>
+                    </form>
+                    <form style="display:inline;" method="post" action="/run/pdfparser/{{file}}">
+                        <button type="submit" title="Run pdf-parser.py">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" stroke="#232323" stroke-width="2" fill="none"/><line x1="8" y1="6" x2="16" y2="6" stroke="#232323" stroke-width="2"/><line x1="8" y1="10" x2="16" y2="10" stroke="#232323" stroke-width="2"/><line x1="8" y1="14" x2="12" y2="14" stroke="#232323" stroke-width="2"/></svg>
+                        </button>
+                    </form>
+                {% endif %}
+                {% if not reports %}
+                    <form style="display:inline;" method="post" action="/run/exiftool/{{file}}">
+                        <button type="submit" title="Run exiftool">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#232323" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="4" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                        </button>
+                    </form>
+                    <form style="display:inline;" method="post" action="/run/filecmd/{{file}}">
+                        <button type="submit" title="Run file command">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/>
+                                <text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">F</text>
+                            </svg>
+                        </button>
+                    </form>
+                    <form style="display:inline;" method="post" action="/run/strings/{{file}}">
+                        <button type="submit" title="Run strings">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/>
+                                <text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">S</text>
+                            </svg>
+                        </button>
+                    </form>
+                {% else %}
+                    <form style="display:inline;" method="post" action="/run_archive/strings/{{file}}">
+                        <button type="submit" title="Run strings (archive)">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/>
+                                <text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">S</text>
+                            </svg>
+                        </button>
+                    </form>
+                {% endif %}
+                {% if not reports %}
+                    <a class="icon-btn-link" href="{{ '/archivefile/' + file if archive else '/uploads/' + file }}" download title="Download">
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M5 20h14a1 1 0 0 0 1-1v-4h-2v3H6v-3H4v4a1 1 0 0 0 1 1zm7-2V4h-2v14l-5-5-1.41 1.41L12 22l7.41-7.41L18 14l-5 5z"/></svg>
+                    </a>
+                {% endif %}
+                {% if not reports and not archive %}
+                    <form style="display:inline;" method="post" action="/archive/{{file}}">
+                        <button type="submit" title="Archive">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                        </button>
+                    </form>
+                {% elif archive %}
+                    <form style="display:inline;" method="post" action="/unarchive/{{file}}">
+                        <button type="submit" title="Unarchive">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M20 20H4V4h16v16zm-8-4v-6m0 6l-3-3m3 3l3-3" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                        </button>
+                    </form>
+                {% endif %}
+                <form style="display:inline;" method="post" action="{{ '/delete_archive/' + file if archive else '/delete/' + file if not reports else '#' }}" onsubmit="return confirm('Are you sure you want to delete {{file}}?');">
+                    <button type="submit" title="Delete">
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" stroke="#232323" stroke-width="2" fill="none"/><line x1="9" y1="9" x2="15" y2="15" stroke="#232323" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#232323" stroke-width="2"/></svg>
+                    </button>
+                </form>
+                {% if not reports and not archive %}
+                    <a class="hash-btn" href="https://www.virustotal.com/gui/file/{{hashes[file]}}" target="_blank" title="Lookup on VirusTotal">{{hashes[file][:8]}}…</a>
+                {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+        {% if output %}
+          <h2>Script Output</h2>
+          <pre>{{output|safe}}</pre>
+        {% endif %}
+    </div>
+</body>
+</html>
+'''
+
+def md5sum(filepath):
+    h = hashlib.md5()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+def sha1sum(filepath):
+    h = hashlib.sha1()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+def sha256sum(filepath):
+    h = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+def sha512sum(filepath):
+    h = hashlib.sha512()
+    with open(filepath, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+def human_readable_size(size, decimal_places=1):
+    for unit in ['bytes','KB','MB','GB','TB']:
+        if size < 1024.0:
+            return f"{size:.{decimal_places}f} {unit}"
+        size /= 1024.0
+    return f"{size:.{decimal_places}f} PB"
+
+def calculate_entropy(filepath):
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    if not data:
+        return 0.0
+    entropy = 0
+    length = len(data)
+    for x in range(256):
+        p_x = data.count(x) / length
+        if p_x > 0:
+            entropy += - p_x * math.log2(p_x)
+    return entropy
+
+def get_file_details(filepath):
+    size = os.path.getsize(filepath)
+    human_size = human_readable_size(size)
+    ext = os.path.splitext(filepath)[1]
+    try:
+        mime_type = subprocess.check_output(['file', '--mime-type', '-b', filepath], universal_newlines=True).strip()
+    except Exception:
+        mime_type = 'unknown'
+    entropy = calculate_entropy(filepath)
+    return size, human_size, mime_type, ext, entropy
+
+def get_report_path(filename):
+    return os.path.join(REPORTS_FOLDER, f"{filename}.report.txt")
+
+def append_to_report(script, filename, output):
+    report_path = get_report_path(filename)
+    # Try uploads first, then archive
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    original_path = file_path
+    if not os.path.isfile(file_path):
+        file_path = os.path.join(ARCHIVE_FOLDER, filename)
+        original_path = file_path
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if not os.path.exists(report_path):
+        size, human_size, mime_type, ext, entropy = get_file_details(file_path)
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write(f"=== REPORT FOR: {filename} ===\n")
+            f.write(f"MD5:     {md5sum(file_path)}\n")
+            f.write(f"SHA1:    {sha1sum(file_path)}\n")
+            f.write(f"SHA256:  {sha256sum(file_path)}\n")
+            f.write(f"SHA512:  {sha512sum(file_path)}\n")
+            f.write(f"File size: {size} bytes ({human_size})\n")
+            f.write(f"MIME type: {mime_type}\n")
+            f.write(f"Extension: {ext}\n")
+            f.write(f"Entropy: {entropy:.4f}\n")
+            f.write(f"Original upload path: {original_path}\n")
+            f.write(f"VirusTotal: https://www.virustotal.com/gui/file/{sha256sum(file_path)}\n")
+            f.write(f"First Analysis: {now}\n")
+            f.write("=" * 40 + "\n")
+
+    file_hash = sha256sum(file_path) if os.path.isfile(file_path) else "N/A"
+    unique_block = f"SCRIPT: {script}\nFILE: {filename}\nHASH: {file_hash}\n---\n"
+    with open(report_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+        if unique_block in content:
+            return
+
+    header = f"\n--- {now} ---\nSCRIPT: {script}\nFILE: {filename}\nHASH: {file_hash}\n---\n"
+    with open(report_path, 'a', encoding='utf-8') as f:
+        f.write(header)
+        f.write(output)
+        f.write('\n')
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename:
+                filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+                file.save(filepath)
+                return redirect(url_for('index'))
+
+    files = [f for f in os.listdir(UPLOAD_FOLDER) if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))]
+    hashes = {f: sha256sum(os.path.join(UPLOAD_FOLDER, f)) for f in files}
+    return render_template_string(HTML_TEMPLATE, files=files, output=None, hashes=hashes, archive=False, reports=False)
+
+@app.route('/archive')
+def view_archive():
+    files = [f for f in os.listdir(ARCHIVE_FOLDER) if os.path.isfile(os.path.join(ARCHIVE_FOLDER, f))]
+    return render_template_string(HTML_TEMPLATE, files=files, output=None, hashes={}, archive=True, reports=False)
+
+@app.route('/reports')
+def view_reports():
+    files = [f for f in os.listdir(REPORTS_FOLDER) if os.path.isfile(os.path.join(REPORTS_FOLDER, f))]
+    return render_template_string(HTML_TEMPLATE, files=files, output=None, hashes={}, archive=False, reports=True)
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
+@app.route('/archivefile/<filename>')
+def archive_file(filename):
+    return send_from_directory(ARCHIVE_FOLDER, filename)
+
+@app.route('/reportsfile/<filename>')
+def report_file(filename):
+    return send_from_directory(REPORTS_FOLDER, filename)
+
+@app.route('/logo.jpg')
+def logo():
+    return send_from_directory('/home/go0se', 'logo.jpg')
+
+@app.route('/background.jpg')
+def background():
+    return send_from_directory('/home/go0se', 'background.jpg')
+
+@app.route('/run/<script>/<filename>', methods=['POST'])
+def run_script(script, filename):
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.isfile(filepath):
+        return "File not found", 404
+
+    output = None
+    if script == 'pdfid':
+        command = f'python3 /home/go0se/pdfid.py "{filepath}"'
+    elif script == 'pdfparser':
+        command = f'python3 /home/go0se/pdf-parser.py "{filepath}"'
+    elif script == 'exiftool':
+        command = f'{EXIFTOOL_PATH} "{filepath}"'
+    elif script == 'filecmd':
+        command = f'file "{filepath}"'
+    elif script == 'strings':
+        command = f'strings "{filepath}"'
+    else:
+        output = "Invalid script"
+
+    if output is None:
+        try:
+            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, timeout=300, universal_newlines=True)
+            append_to_report(script, filename, output)
+        except subprocess.CalledProcessError as e:
+            output = f"Error: {e.output}"
+        except Exception as e:
+            output = str(e)
+
+    files = [f for f in os.listdir(UPLOAD_FOLDER) if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))]
+    hashes = {f: sha256sum(os.path.join(UPLOAD_FOLDER, f)) for f in files}
+    return render_template_string(HTML_TEMPLATE, files=files, output=output, hashes=hashes, archive=False, reports=False)
+
+@app.route('/run_archive/strings/<filename>', methods=['POST'])
+def run_archive_strings(filename):
+    filepath = os.path.join(ARCHIVE_FOLDER, filename)
+    if not os.path.isfile(filepath):
+        return "File not found", 404
+    try:
+        output = subprocess.check_output(f'strings "{filepath}"', shell=True, stderr=subprocess.STDOUT, timeout=300, universal_newlines=True)
+        append_to_report('strings', filename, output)
+    except subprocess.CalledProcessError as e:
+        output = f"Error: {e.output}"
+    except Exception as e:
+        output = str(e)
+    files = [f for f in os.listdir(ARCHIVE_FOLDER) if os.path.isfile(os.path.join(ARCHIVE_FOLDER, f))]
+    return render_template_string(HTML_TEMPLATE, files=files, output=output, hashes={}, archive=True, reports=False)
+
+@app.route('/archive/<filename>', methods=['POST'])
+def archive(filename):
+    src = os.path.join(UPLOAD_FOLDER, filename)
+    dst = os.path.join(ARCHIVE_FOLDER, filename)
+    if os.path.isfile(src):
+        shutil.move(src, dst)
+        out_txt_src = src + '.out.txt'
+        out_txt_dst = dst + '.out.txt'
+        if os.path.isfile(out_txt_src):
+            shutil.move(out_txt_src, out_txt_dst)
+    return redirect(url_for('index'))
+
+@app.route('/unarchive/<filename>', methods=['POST'])
+def unarchive(filename):
+    src = os.path.join(ARCHIVE_FOLDER, filename)
+    dst = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.isfile(src):
+        shutil.move(src, dst)
+        out_txt_src = src + '.out.txt'
+        out_txt_dst = dst + '.out.txt'
+        if os.path.isfile(out_txt_src):
+            shutil.move(out_txt_src, out_txt_dst)
+    return redirect(url_for('view_archive'))
+
+@app.route('/delete/<filename>', methods=['POST'])
+def delete_file(filename):
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+        outpath = filepath + '.out.txt'
+        if os.path.isfile(outpath):
+            os.remove(outpath)
+    return redirect(url_for('index'))
+
+@app.route('/delete_archive/<filename>', methods=['POST'])
+def delete_archive_file(filename):
+    filepath = os.path.join(ARCHIVE_FOLDER, filename)
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+        outpath = filepath + '.out.txt'
+        if os.path.isfile(outpath):
+            os.remove(outpath)
+    return redirect(url_for('view_archive'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080)

@@ -21,6 +21,8 @@
 - **Per-file Reports:** Each file has its own `.report.txt` file, which logs all unique analysis results with timestamps and prevents duplicate entries.
 - **Web UI:** Modern, responsive interface with SVG icons, download links, and quick access to all features.
 - **No Data Loss:** Deleting a file from the UI also deletes its analysis report.
+- **Automatic startup** via systemd service.
+- **Automatic WiFi Access Point setup:** If the device cannot connect to a known WiFi network on boot, it will automatically create its own WiFi access point (hotspot), allowing direct connection to the device and access to the web app. This ensures you can always connect to Mini REtk, even in environments without existing WiFi.
 
 ### **Workflow**
 1. **Upload a file.**

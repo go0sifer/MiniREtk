@@ -31,4 +31,9 @@
 4. **Reports:** Download or view detailed per-file reports at any time.
 
 ## **Deploy**
- - If you want to run MiniREtk see delpoyMiniREtk.sh. You'll have to go get pdfid.py and pdf-parser.py on your own.
+ - If you want to run MiniREtk see delpoyMiniREtk.sh
+ - Enable Execution: `chmod +x deployMiniREtk.sh`
+ - Run the script: `./deployMiniREtk.sh` 
+ - This was set up to run headless on a Raspberry Pi Zero W so it installs AutoHotspot for recovery when it cannot make Wifi connection.
+ - HOWEVER, This script will work on a regular install of Ubuntu. The AutoHotspot setup will fail, but everything else will work.
+ - Download pdfid.py and pdf-parser.py from https://blog.didierstevens.com/programs/pdf-tools/

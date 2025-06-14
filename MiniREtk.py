@@ -331,7 +331,7 @@ HTML_TEMPLATE = '''
                         </button>
                     </form>
                 {% endif %}
-                <form style="display:inline;" method="post" action="{{ '/delete_archive/' + file if archive else '/delete/' + file if not reports else '#' }}" onsubmit="return confirm('Are you sure you want to delete {{file}}?');">
+                <form style="display:inline;" method="post" action="{{ '/delete_archive/' + file if archive else '/delete/' + file if not reports else '/delete_report/' + file }}" onsubmit="return confirm('Are you sure you want to delete {{file}}?');">
                     <button type="submit" title="Delete">
                         <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" stroke="#232323" stroke-width="2" fill="none"/><line x1="9" y1="9" x2="15" y2="15" stroke="#232323" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#232323" stroke-width="2"/></svg>
                     </button>
@@ -577,6 +577,10 @@ def delete_file(filename):
         outpath = filepath + '.out.txt'
         if os.path.isfile(outpath):
             os.remove(outpath)
+        # Delete report file
+        report_path = os.path.join(REPORTS_FOLDER, f"{filename}.report.txt")
+        if os.path.isfile(report_path):
+            os.remove(report_path)
     return redirect(url_for('index'))
 
 @app.route('/delete_archive/<filename>', methods=['POST'])
@@ -587,7 +591,18 @@ def delete_archive_file(filename):
         outpath = filepath + '.out.txt'
         if os.path.isfile(outpath):
             os.remove(outpath)
+        # Delete report file
+        report_path = os.path.join(REPORTS_FOLDER, f"{filename}.report.txt")
+        if os.path.isfile(report_path):
+            os.remove(report_path)
     return redirect(url_for('view_archive'))
+
+@app.route('/delete_report/<filename>', methods=['POST'])
+def delete_report_file_route(filename):
+    report_path = os.path.join(REPORTS_FOLDER, filename)
+    if os.path.isfile(report_path):
+        os.remove(report_path)
+    return redirect(url_for('view_reports'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)

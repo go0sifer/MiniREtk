@@ -1,6 +1,14 @@
-## 📝 **Summary: Mini Analyzer Tool**
+                                          _____        _____                    
+ ______  _____  _____  ______  ______  __|__   |__  __|___  |__    __    __  __ 
+|   ___|/     \/     ||   ___||   ___||     |     ||   ___|    | _|  |_ |  |/ / 
+|   |  ||     ||  /  | `-.`-. |   ___||     \     ||   ___|    ||_    _||     \ 
+|______|\_____/|_____/|______||______||__|\__\  __||______|  __|  |__|  |__|\__\
+                                         |_____|      |_____|                   
+01100111 01101111 00110000 01110011 01100101 01010010 01000101 01110100 01101011  
 
-**Mini Analyzer** is a web-based forensic file analysis platform built with Flask. It allows users to upload files, analyze them with common forensic tools, archive/unarchive files, and generate detailed, deduplicated per-file reports. The tool is designed for security analysts, incident responders, and forensic investigators.
+## 📝 **Summary: Mini REtk Analyzer**
+
+**Mini REtk Analyzer** is a web-based forensic file analysis platform built with Flask. It allows users to upload files, analyze them with common forensic tools, archive/unarchive files, and generate detailed, deduplicated per-file reports. The tool is designed for security analysts, incident responders, and forensic investigators.
 
 ### **Key Features**
 - **File Uploads:** Upload any file for analysis. (Note: Original file system timestamps cannot be preserved via browser upload.)

@@ -7,7 +7,7 @@ set -e
 # ====== USER CONFIG =======
 USERNAME="go0se"
 PROJECT_DIR="/home/$USERNAME"
-APP_SCRIPT="app.py"
+APP_SCRIPT="MiniREtk.py"
 PDFID_SCRIPT="pdfid.py"
 PDFPARSER_SCRIPT="pdf-parser.py"
 LOGO_IMG="logo.jpg"

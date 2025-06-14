@@ -597,7 +597,7 @@ def delete_archive_file(filename):
             os.remove(report_path)
     return redirect(url_for('view_archive'))
 
-@app.route('/delete_report/<filename>', methods=['POST'])
+@app.route('/delete_report/<path:filename>', methods=['POST'])
 def delete_report_file_route(filename):
     report_path = os.path.join(REPORTS_FOLDER, filename)
     if os.path.isfile(report_path):

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Mini REtk Automated Setup Script
-# Tested on Raspberry Pi OS Bookworm and later
+# Mini REtk Analyzer Automated Setup Script
 
 set -e
 
@@ -15,7 +14,7 @@ LOGO_IMG="logo.jpg"
 BG_IMG="background.jpg"
 # ==========================
 
-echo "---- Mini REtk Automated Setup ----"
+echo "---- Mini REtk Analyzer Automated Setup ----"
 
 # 1. Update OS
 echo "[*] Updating OS..."
@@ -39,10 +38,10 @@ chmod +x "$PROJECT_DIR/$PDFID_SCRIPT" "$PROJECT_DIR/$PDFPARSER_SCRIPT" || true
 
 # 6. Set up systemd service
 echo "[*] Setting up systemd service..."
-SERVICE_FILE="/etc/systemd/system/miniretk.service"
+SERVICE_FILE="/etc/systemd/system/miniretk-analyzer.service"
 sudo tee $SERVICE_FILE > /dev/null <<EOF
 [Unit]
-Description=Mini REtk Flask App
+Description=Mini REtk Analyzer Flask App
 After=network.target
 
 [Service]
@@ -56,10 +55,10 @@ WantedBy=multi-user.target
 EOF
 
 sudo systemctl daemon-reload
-sudo systemctl enable miniretk
-sudo systemctl restart miniretk
+sudo systemctl enable miniretk-analyzer
+sudo systemctl restart miniretk-analyzer
 
-echo "[*] Mini REtk service installed and started."
+echo "[*] Mini REtk Analyzer service installed and started."
 
 # 7. Install and configure AutoHotspot
 echo "[*] Installing AutoHotspot for fallback WiFi access point..."
@@ -74,10 +73,10 @@ echo "[*] AutoHotspot installed. You can edit /etc/hostapd/hostapd.conf to chang
 
 # 8. Final message
 echo
-echo "---- Mini REtk Setup Complete! ----"
+echo "---- Mini REtk Analyzer Setup Complete! ----"
 echo "Access the web app at http://<raspberrypi-ip>:8080"
 echo "If no WiFi is available, connect to the Pi's hotspot and use the Pi's hotspot IP address."
-echo "To check the Mini REtk service: sudo systemctl status miniretk"
+echo "To check the Mini REtk Analyzer service: sudo systemctl status miniretk-analyzer"
 echo "To check AutoHotspot: sudo systemctl status autohotspot"
 echo
-echo "Enjoy using Mini REtk!"
+echo "Enjoy using Mini REtk Analyzer!"

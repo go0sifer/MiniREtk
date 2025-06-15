@@ -44,10 +44,11 @@ echo "[*] Setting up systemd service..."
 SERVICE_FILE="/etc/systemd/system/miniretk-analyzer.service"
 sudo tee $SERVICE_FILE > /dev/null <<EOF
 [Unit]
-Description=Mini REtk Analyzer Flask App
+Description=Mini REtk Analyzer Service
 After=network.target
 
 [Service]
+Type=simple
 User=$USERNAME
 WorkingDirectory=$PROJECT_DIR
 ExecStart=/usr/bin/python3 $PROJECT_DIR/$APP_SCRIPT
@@ -61,24 +62,23 @@ sudo systemctl daemon-reload
 sudo systemctl enable miniretk-analyzer
 sudo systemctl restart miniretk-analyzer
 
-echo "[*] Mini REtk Analyzer service installed and started."
-
-# 7. Install and configure AutoHotspot (GitHub method)
-echo "[*] Installing AutoHotspot for fallback WiFi access point from GitHub..."
-cd "$PROJECT_DIR"
-if [ ! -d AutoHotspot-Installer ]; then
-    git clone https://github.com/RaspberryConnect/AutoHotspot-Installer.git
+# 7. (Optional) Install AutoHotspot if running on Raspberry Pi
+echo "[*] Checking if this is a Raspberry Pi for AutoHotspot install..."
+if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
+    echo "[*] Raspberry Pi detected. Installing AutoHotspot..."
+    curl "https://www.raspberryconnect.com/images/hsinstaller/Autohotspot-Setup.tar.xz" -o AutoHotspot-Setup.tar.xz
+    tar -xvJf AutoHotspot-Setup.tar.xz
+    cd Autohotspot
+    sudo ./autohotspot-setup.sh
+    cd ..
+else
+    echo "[*] Not a Raspberry Pi. Skipping AutoHotspot installation."
 fi
-cd AutoHotspot-Installer/AutoHotspot-Setup/Autohotspot
-sudo chmod +x autohotspot-setup.sh
-sudo ./autohotspot-setup.sh
 
-echo "[*] AutoHotspot installed. You can edit /etc/hostapd/hostapd.conf to change SSID and password if desired."
-
-# 8. Final message
 echo
-echo "---- Mini REtk Analyzer Setup Complete! ----"
-echo "Access the web app at http://<raspberrypi-ip>:8080"
+echo "---- Setup Complete ----"
+echo "The Mini REtk Analyzer web interface should now be running on port 8080."
+echo "Access it at: http://<device-ip>:8080"
 echo "If no WiFi is available, connect to the Pi's hotspot and use the Pi's hotspot IP address."
 echo "To check the Mini REtk Analyzer service: sudo systemctl status miniretk-analyzer"
 echo "To check AutoHotspot: sudo systemctl status autohotspot"

@@ -30,13 +30,7 @@ sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git
 echo "[*] Creating project directories..."
 mkdir -p "$PROJECT_DIR/uploads" "$PROJECT_DIR/archive" "$PROJECT_DIR/reports"
 
-# 4. Prompt for copying scripts, zips, and images
-echo "[*] Please copy the following files to $PROJECT_DIR:"
-echo "    $APP_SCRIPT, $PDFID_ZIP, $PDFPARSER_ZIP, $LOGO_IMG, $BG_IMG"
-echo "    (You can use scp or any other method.)"
-read -p "Press Enter to continue after copying the files..."
-
-# 5. Check for required files
+# 4. Check for required files
 cd "$PROJECT_DIR"
 missing=0
 
@@ -75,7 +69,7 @@ if [[ $missing -eq 1 ]]; then
     fi
 fi
 
-# 6. Unzip PDF tools if needed
+# 5. Unzip PDF tools if needed
 echo "[*] Unzipping PDF tool archives..."
 if [[ -f "$PDFID_ZIP" ]]; then
     unzip -o "$PDFID_ZIP"
@@ -84,12 +78,12 @@ if [[ -f "$PDFPARSER_ZIP" ]]; then
     unzip -o "$PDFPARSER_ZIP"
 fi
 
-# 7. Convert line endings and make scripts executable
+# 6. Convert line endings and make scripts executable
 echo "[*] Converting line endings and setting executable permissions..."
 dos2unix "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
 chmod +x "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
 
-# 8. Set up systemd service
+# 7. Set up systemd service
 echo "[*] Setting up systemd service..."
 SERVICE_FILE="/etc/systemd/system/miniretk-analyzer.service"
 sudo tee $SERVICE_FILE > /dev/null <<EOF
@@ -112,7 +106,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable miniretk-analyzer
 sudo systemctl restart miniretk-analyzer
 
-# 9. (Optional) Install AutoHotspot if running on Raspberry Pi
+# 8. (Optional) Install AutoHotspot if running on Raspberry Pi
 echo "[*] Checking if this is a Raspberry Pi for AutoHotspot install..."
 if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
     echo "[*] Raspberry Pi detected. Installing AutoHotspot..."

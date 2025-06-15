@@ -37,3 +37,4 @@
  - This was set up to run headless on a Raspberry Pi Zero W so it installs AutoHotspot for recovery when it cannot make Wifi connection.
  - HOWEVER, This script will work on a regular install of Ubuntu. The AutoHotspot setup will fail, but everything else will work.
  - Download pdfid.py and pdf-parser.py from https://blog.didierstevens.com/programs/pdf-tools/
+ - Find your favorite jpg and gif and name them background.jpg and logo.gif

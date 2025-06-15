@@ -4,7 +4,7 @@ PROJECT_DIR = f"/home/{USERNAME}"
 UPLOAD_FOLDER = f"{PROJECT_DIR}/uploads"
 ARCHIVE_FOLDER = f"{PROJECT_DIR}/archive"
 REPORTS_FOLDER = f"{PROJECT_DIR}/reports"
-LOGO_PATH = f"{PROJECT_DIR}/logo.jpg"
+LOGO_PATH = f"{PROJECT_DIR}/logo.gif"
 BG_PATH = f"{PROJECT_DIR}/background.jpg"
 PDFID_PATH = f"{PROJECT_DIR}/pdfid.py"
 PDFPARSER_PATH = f"{PROJECT_DIR}/pdf-parser.py"
@@ -33,6 +33,13 @@ HTML_TEMPLATE = '''
     <title>Mini REtk Analyzer</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --icon-default: #232323;       /* dark for tool icons */
+            --icon-delete: #e11d48;        /* red for delete */
+            --icon-archive: #65a30d;       /* lime green for archive */
+            --icon-report: #0ea5e9;        /* blue for report */
+            --icon-hover: #cc0000;         /* Boston University Red for hover */
+        }
         body {
             font-family: 'Montserrat', sans-serif;
             background: url('/background.jpg') no-repeat center center fixed;
@@ -65,7 +72,7 @@ HTML_TEMPLATE = '''
             margin-left: 8px;
         }
         .top-btn, .archive-btn, .reports-btn {
-            background: linear-gradient(90deg, #fbc2eb 0%, #a18cd1 100%);
+            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
             color: #232323;
             border: none;
             border-radius: 8px;
@@ -80,7 +87,7 @@ HTML_TEMPLATE = '''
             gap: 7px;
         }
         .top-btn:hover, .archive-btn:hover, .reports-btn:hover {
-            background: linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%);
+            background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%);
             color: #232323;
             text-decoration: none;
         }
@@ -105,8 +112,8 @@ HTML_TEMPLATE = '''
         input[type="file"] {
             color: #fff;
         }
-        input[type="submit"], button, .icon-btn-link, .hash-btn {
-            background: linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%);
+        input[type="submit"], button, .icon-btn-link {
+            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
             color: #232323;
             border: none;
             border-radius: 8px;
@@ -124,11 +131,29 @@ HTML_TEMPLATE = '''
             min-width: 38px;
             min-height: 38px;
         }
-        input[type="submit"]:hover, button:hover, .icon-btn-link:hover, .hash-btn:hover {
-            background: linear-gradient(90deg, #fbc2eb 0%, #a18cd1 100%);
+        input[type="submit"]:hover, button:hover, .icon-btn-link:hover {
+            background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%);
             box-shadow: 0 4px 16px #0006;
             color: #232323;
             text-decoration: none;
+        }
+        .hash-btn {
+            min-width: 38px;
+            min-height: 38px;
+            padding: 8px;
+            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+            color: #232323;
+            border: none;
+            font-size: 0.9rem;
+            font-family: monospace;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-left: 8px;
+            text-decoration: none;
+        }
+        .hash-btn:hover {
+            background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%);
+            color: #232323;
         }
         ul {
             list-style: none;
@@ -144,7 +169,7 @@ HTML_TEMPLATE = '''
             justify-content: space-between;
         }
         li a.filename-link {
-            color: #b39ddb;
+            color: #00cc00;
             font-weight: 600;
             text-decoration: none;
             margin-right: 18px;
@@ -165,26 +190,13 @@ HTML_TEMPLATE = '''
             vertical-align: middle;
             display: block;
             margin: 0;
+            color: var(--icon-default);
+            transition: color 0.2s;
         }
-        .hash-btn {
-            min-width: 38px;
-            min-height: 38px;
-            padding: 8px;
-            background: #fffde7;
-            color: #232323;
-            border: 2px solid #a18cd1;
-            font-size: 0.9rem;
-            font-family: monospace;
-            font-weight: 600;
-            border-radius: 8px;
-            margin-left: 8px;
-            text-decoration: none;
-        }
-        .hash-btn:hover {
-            background: #fbc2eb;
-            color: #232323;
-            border: 2px solid #b39ddb;
-        }
+        .delete-btn .icon-btn { color: var(--icon-delete); }
+        .archive-btn .icon-btn { color: var(--icon-archive); }
+        .reports-btn .icon-btn { color: var(--icon-report); }
+        .icon-btn:hover { color: var(--icon-hover); }
         pre {
             background: #23233a;
             color: #fffde7;
@@ -208,33 +220,33 @@ HTML_TEMPLATE = '''
 </head>
 <body>
     <div class="container">
-        <img src="/logo.jpg" class="logo" alt="Logo">
+        <img src="/logo.gif" class="logo" alt="Logo">
         <div class="top-buttons">
             {% if not archive and not reports %}
                 <a href="/archive" class="archive-btn" title="View Archive">
-                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke-width="2"/></svg>
                     Archive
                 </a>
                 <a href="/reports" class="reports-btn" title="View Reports">
-                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/><text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">R</text></svg>
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/><text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">R</text></svg>
                     Reports
                 </a>
             {% elif archive %}
                 <a href="/" class="top-btn" title="Back to Analysis">
-                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2"/></svg>
                     Back
                 </a>
                 <a href="/reports" class="reports-btn" title="View Reports">
-                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/><text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">R</text></svg>
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/><text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">R</text></svg>
                     Reports
                 </a>
             {% elif reports %}
                 <a href="/" class="top-btn" title="Back to Analysis">
-                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2"/></svg>
                     Back
                 </a>
                 <a href="/archive" class="archive-btn" title="View Archive">
-                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                    <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke-width="2"/></svg>
                     Archive
                 </a>
             {% endif %}
@@ -261,7 +273,7 @@ HTML_TEMPLATE = '''
                 {% if reports %}
                     <a class="filename-link" href="/reportsfile/{{file}}" target="_blank">{{file}}</a>
                     <a class="icon-btn-link" href="/reportsfile/{{file}}" download title="Download Report">
-                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M5 20h14a1 1 0 0 0 1-1v-4h-2v3H6v-3H4v4a1 1 0 0 0 1 1zm7-2V4h-2v14l-5-5-1.41 1.41L12 22l7.41-7.41L18 14l-5 5z"/></svg>
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 20h14a1 1 0 0 0 1-1v-4h-2v3H6v-3H4v4a1 1 0 0 0 1 1zm7-2V4h-2v14l-5-5-1.41 1.41L12 22l7.41-7.41L18 14l-5 5z" stroke-width="2"/></svg>
                     </a>
                 {% elif archive %}
                     <a class="filename-link" href="/archivefile/{{file}}" target="_blank">{{file}}</a>
@@ -272,68 +284,68 @@ HTML_TEMPLATE = '''
                 {% if not archive and not reports and file.lower().endswith('.pdf') %}
                     <form style="display:inline;" method="post" action="/run/pdfid/{{file}}">
                         <button type="submit" title="Run pdfid.py">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" stroke="#232323" stroke-width="2" fill="none"/><line x1="15" y1="15" x2="21" y2="21" stroke="#232323" stroke-width="2"/></svg>
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" stroke-width="2"/><line x1="15" y1="15" x2="21" y2="21" stroke-width="2"/></svg>
                         </button>
                     </form>
                     <form style="display:inline;" method="post" action="/run/pdfparser/{{file}}">
                         <button type="submit" title="Run pdf-parser.py">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" stroke="#232323" stroke-width="2" fill="none"/><line x1="8" y1="6" x2="16" y2="6" stroke="#232323" stroke-width="2"/><line x1="8" y1="10" x2="16" y2="10" stroke="#232323" stroke-width="2"/><line x1="8" y1="14" x2="12" y2="14" stroke="#232323" stroke-width="2"/></svg>
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><line x1="8" y1="6" x2="16" y2="6" stroke-width="2"/><line x1="8" y1="10" x2="16" y2="10" stroke-width="2"/><line x1="8" y1="14" x2="12" y2="14" stroke-width="2"/></svg>
                         </button>
                     </form>
                 {% endif %}
                 {% if not reports %}
                     <form style="display:inline;" method="post" action="/run/exiftool/{{file}}">
                         <button type="submit" title="Run exiftool">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#232323" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="4" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke-width="2"/></svg>
                         </button>
                     </form>
                     <form style="display:inline;" method="post" action="/run/filecmd/{{file}}">
                         <button type="submit" title="Run file command">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24">
-                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/>
-                                <text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">F</text>
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
+                                <text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">F</text>
                             </svg>
                         </button>
                     </form>
                     <form style="display:inline;" method="post" action="/run/strings/{{file}}">
                         <button type="submit" title="Run strings">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24">
-                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/>
-                                <text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">S</text>
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
+                                <text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">S</text>
                             </svg>
                         </button>
                     </form>
                 {% else %}
                     <form style="display:inline;" method="post" action="/run_archive/strings/{{file}}">
                         <button type="submit" title="Run strings (archive)">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24">
-                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#232323" stroke-width="2" fill="none"/>
-                                <text x="12" y="16" font-size="10" fill="#232323" text-anchor="middle" font-family="monospace">S</text>
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
+                                <text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">S</text>
                             </svg>
                         </button>
                     </form>
                 {% endif %}
                 {% if not reports %}
                     <a class="icon-btn-link" href="{{ '/archivefile/' + file if archive else '/uploads/' + file }}" download title="Download">
-                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M5 20h14a1 1 0 0 0 1-1v-4h-2v3H6v-3H4v4a1 1 0 0 0 1 1zm7-2V4h-2v14l-5-5-1.41 1.41L12 22l7.41-7.41L18 14l-5 5z"/></svg>
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 20h14a1 1 0 0 0 1-1v-4h-2v3H6v-3H4v4a1 1 0 0 0 1 1zm7-2V4h-2v14l-5-5-1.41 1.41L12 22l7.41-7.41L18 14l-5 5z" stroke-width="2"/></svg>
                     </a>
                 {% endif %}
                 {% if not reports and not archive %}
                     <form style="display:inline;" method="post" action="/archive/{{file}}">
-                        <button type="submit" title="Archive">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                        <button type="submit" title="Archive" class="archive-btn">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v2H4zm2 4h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" stroke-width="2"/></svg>
                         </button>
                     </form>
                 {% elif archive %}
                     <form style="display:inline;" method="post" action="/unarchive/{{file}}">
-                        <button type="submit" title="Unarchive">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><path d="M20 20H4V4h16v16zm-8-4v-6m0 6l-3-3m3 3l3-3" stroke="#232323" stroke-width="2" fill="none"/></svg>
+                        <button type="submit" title="Unarchive" class="archive-btn">
+                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 20H4V4h16v16zm-8-4v-6m0 6l-3-3m3 3l3-3" stroke-width="2"/></svg>
                         </button>
                     </form>
                 {% endif %}
                 <form style="display:inline;" method="post" action="{{ '/delete_archive/' + file if archive else '/delete/' + file if not reports else '/delete_report/' + file }}" onsubmit="return confirm('Are you sure you want to delete {{file}}?');">
-                    <button type="submit" title="Delete">
-                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="#232323" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" stroke="#232323" stroke-width="2" fill="none"/><line x1="9" y1="9" x2="15" y2="15" stroke="#232323" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#232323" stroke-width="2"/></svg>
+                    <button type="submit" title="Delete" class="delete-btn">
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/></svg>
                     </button>
                 </form>
                 {% if not reports and not archive %}
@@ -489,9 +501,9 @@ def archive_file(filename):
 def report_file(filename):
     return send_from_directory(REPORTS_FOLDER, filename)
 
-@app.route('/logo.jpg')
+@app.route('/logo.gif')
 def logo():
-    return send_from_directory(PROJECT_DIR, 'logo.jpg')
+    return send_from_directory(PROJECT_DIR, 'logo.gif')
 
 @app.route('/background.jpg')
 def background():

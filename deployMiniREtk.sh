@@ -10,7 +10,7 @@ PROJECT_DIR="/home/$USERNAME"
 APP_SCRIPT="MiniREtk.py"
 PDFID_SCRIPT="pdfid.py"
 PDFPARSER_SCRIPT="pdf-parser.py"
-LOGO_IMG="logo.jpg"
+LOGO_IMG="logo.gif"
 BG_IMG="background.jpg"
 # ==========================
 

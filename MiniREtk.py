@@ -1,6 +1,6 @@
 # ====== USER CONFIG =======
 USERNAME = "go0se"
-PROJECT_DIR = f"/home/{USERNAME}"
+PROJECT_DIR = f"/home/{USERNAME}/miniretk"
 UPLOAD_FOLDER = f"{PROJECT_DIR}/uploads"
 ARCHIVE_FOLDER = f"{PROJECT_DIR}/archive"
 REPORTS_FOLDER = f"{PROJECT_DIR}/reports"

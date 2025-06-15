@@ -36,9 +36,9 @@ HTML_TEMPLATE = '''
         :root {
             --icon-default: #232323;       /* dark for tool icons */
             --icon-delete: #e11d48;        /* red for delete */
-            --icon-archive: #65a30d;       /* lime green for archive */
-            --icon-report: #0ea5e9;        /* blue for report */
-            --icon-hover: #cc0000;         /* Boston University Red for hover */
+            --icon-archive: #232323;       /* dark for archive */
+            --icon-report: #3300cc;        /* purp for report */
+            --icon-hover: #cc0000;         /* red for hover */
         }
         body {
             font-family: 'Montserrat', sans-serif;
@@ -100,7 +100,7 @@ HTML_TEMPLATE = '''
         h2 {
             margin-top: 36px;
             font-weight: 700;
-            color: #d1c4e9;
+            color: #006600;
         }
         form.upload-form {
             display: flex;

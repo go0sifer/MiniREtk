@@ -12,6 +12,8 @@ PDFID_SCRIPT="pdfid.py"
 PDFPARSER_SCRIPT="pdf-parser.py"
 LOGO_IMG="logo.gif"
 BG_IMG="background.jpg"
+PDFID_ZIP="pdfid_v0_2_10.zip"
+PDFPARSER_ZIP="pdf-parser_V0_7_12.zip"
 # ==========================
 
 echo "---- Mini REtk Analyzer Automated Setup ----"
@@ -22,24 +24,72 @@ sudo apt update && sudo apt upgrade -y
 
 # 2. Install required packages
 echo "[*] Installing Python, Flask, and forensic tools..."
-sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git dos2unix
+sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git dos2unix unzip
 
 # 3. Create project directories
 echo "[*] Creating project directories..."
 mkdir -p "$PROJECT_DIR/uploads" "$PROJECT_DIR/archive" "$PROJECT_DIR/reports"
 
-# 4. Prompt for copying scripts and images
-echo "[*] Please copy your $APP_SCRIPT, $PDFID_SCRIPT, $PDFPARSER_SCRIPT, $LOGO_IMG, and $BG_IMG to $PROJECT_DIR."
-echo "    You can use scp or any other method."
+# 4. Prompt for copying scripts, zips, and images
+echo "[*] Please copy the following files to $PROJECT_DIR:"
+echo "    $APP_SCRIPT, $PDFID_ZIP, $PDFPARSER_ZIP, $LOGO_IMG, $BG_IMG"
+echo "    (You can use scp or any other method.)"
 read -p "Press Enter to continue after copying the files..."
 
-# 5. Convert line endings and make scripts executable
-echo "[*] Converting line endings and setting executable permissions..."
+# 5. Check for required files
 cd "$PROJECT_DIR"
+missing=0
+
+check_and_warn() {
+    if [[ ! -f "$1" ]]; then
+        if [[ "$1" == "$LOGO_IMG" || "$1" == "$BG_IMG" ]]; then
+            echo "    [!] Optional: $1 not found. You can continue, but there will be no $( [[ "$1" == "$LOGO_IMG" ]] && echo "logo" || echo "background" )."
+        else
+            echo "    [!] Required: $1 is missing!"
+            missing=1
+        fi
+    else
+        echo "    [+] Found: $1"
+    fi
+}
+
+echo "[*] Checking for required files in $PROJECT_DIR..."
+check_and_warn "$APP_SCRIPT"
+check_and_warn "$PDFID_ZIP"
+check_and_warn "$PDFPARSER_ZIP"
+check_and_warn "$LOGO_IMG"
+check_and_warn "$BG_IMG"
+
+if [[ $missing -eq 1 ]]; then
+    echo
+    echo "[!] One or more required files are missing. Please copy them to $PROJECT_DIR and press Enter to continue."
+    read -p ""
+    # Re-check after user input
+    missing=0
+    check_and_warn "$APP_SCRIPT"
+    check_and_warn "$PDFID_ZIP"
+    check_and_warn "$PDFPARSER_ZIP"
+    if [[ $missing -eq 1 ]]; then
+        echo "[!] Required files are still missing. Exiting setup."
+        exit 1
+    fi
+fi
+
+# 6. Unzip PDF tools if needed
+echo "[*] Unzipping PDF tool archives..."
+if [[ -f "$PDFID_ZIP" ]]; then
+    unzip -o "$PDFID_ZIP"
+fi
+if [[ -f "$PDFPARSER_ZIP" ]]; then
+    unzip -o "$PDFPARSER_ZIP"
+fi
+
+# 7. Convert line endings and make scripts executable
+echo "[*] Converting line endings and setting executable permissions..."
 dos2unix "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
 chmod +x "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
 
-# 6. Set up systemd service
+# 8. Set up systemd service
 echo "[*] Setting up systemd service..."
 SERVICE_FILE="/etc/systemd/system/miniretk-analyzer.service"
 sudo tee $SERVICE_FILE > /dev/null <<EOF
@@ -62,7 +112,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable miniretk-analyzer
 sudo systemctl restart miniretk-analyzer
 
-# 7. (Optional) Install AutoHotspot if running on Raspberry Pi
+# 9. (Optional) Install AutoHotspot if running on Raspberry Pi
 echo "[*] Checking if this is a Raspberry Pi for AutoHotspot install..."
 if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
     echo "[*] Raspberry Pi detected. Installing AutoHotspot..."

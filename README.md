@@ -30,6 +30,9 @@
 3. **Archive/Unarchive:** Move files in/out of the archive as needed.
 4. **Reports:** Download or view detailed per-file reports at any time.
 
+### **Speedrun**
+ - View the speedrun of the app here: https://youtu.be/Dl0Pyo-j40A
+
 ## **Deploy**
 
 ### **Quick Start**

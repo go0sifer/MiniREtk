@@ -61,7 +61,7 @@ At the top of the script, you will see:
 ```bash
 # ====== USER CONFIG =======
 USERNAME="go0se"
-PROJECT_DIR="/home/$USERNAME/miniretk"
+PROJECT_DIR="/home/$USERNAME/MiniREtk"
 APP_SCRIPT="MiniREtk.py"
 PDFID_SCRIPT="pdfid.py"
 PDFPARSER_SCRIPT="pdf-parser.py"
@@ -70,7 +70,7 @@ BG_IMG="background.jpg"
 # ==========================
 ```
 - **Change `USERNAME`** to your system username (e.g., `"yourusername"`).
-- **`PROJECT_DIR`** is now set to `/home/$USERNAME/miniretk` by default. Change only if you want a different location.
+- **`PROJECT_DIR`** is now set to `/home/$USERNAME/MiniREtk` by default. Change only if you want a different location.
 
 #### **In `MiniREtk.py`:**
 
@@ -78,7 +78,7 @@ At the top, look for:
 ```python
 # ====== USER CONFIG =======
 USERNAME = "go0se"
-PROJECT_DIR = f"/home/{USERNAME}/miniretk"
+PROJECT_DIR = f"/home/{USERNAME}/MiniREtk"
 UPLOAD_FOLDER = f"{PROJECT_DIR}/uploads"
 ARCHIVE_FOLDER = f"{PROJECT_DIR}/archive"
 REPORTS_FOLDER = f"{PROJECT_DIR}/reports"
@@ -90,7 +90,7 @@ EXIFTOOL_PATH = 'exiftool'
 # ==========================
 ```
 - **Change `USERNAME`** to match what you set in the shell script.
-- **`PROJECT_DIR`** should be `/home/yourusername/miniretk` unless you have a reason to change it.
+- **`PROJECT_DIR`** should be `/home/yourusername/MiniREtk` unless you have a reason to change it.
 
 > **Both files must use the same username and project directory.**
 
@@ -104,7 +104,7 @@ EXIFTOOL_PATH = 'exiftool'
   ```
 - The script will:
   - Update your OS and install dependencies.
-  - Create the project directory at `/home/$USERNAME/miniretk` and its subfolders.
+  - Create the project directory at `/home/$USERNAME/MiniREtk` and its subfolders.
   - Prompt you to copy scripts and images into the project directory.
   - Convert line endings and set executable permissions.
   - Set up the systemd service for automatic startup.
@@ -113,7 +113,7 @@ EXIFTOOL_PATH = 'exiftool'
 
 ### **3. Copy Required Files**
 
-- When prompted, copy the following into your project directory (`/home/yourusername/miniretk/`):
+- When prompted, copy the following into your project directory (`/home/yourusername/MiniREtk/`):
   - `MiniREtk.py`
   - `pdfid.py`
   - `pdf-parser.py`
@@ -133,8 +133,8 @@ EXIFTOOL_PATH = 'exiftool'
 
 | File             | Variable(s) to Edit   | Example Value                    | Purpose                      |
 |------------------|----------------------|----------------------------------|------------------------------|
-| deployMiniREtk.sh| USERNAME, PROJECT_DIR| "yourusername", "/home/yourusername/miniretk" | Sets install location        |
-| MiniREtk.py      | USERNAME, PROJECT_DIR| "yourusername", "/home/yourusername/miniretk" | Sets runtime paths           |
+| deployMiniREtk.sh| USERNAME, PROJECT_DIR| "yourusername", "/home/yourusername/MiniREtk" | Sets install location        |
+| MiniREtk.py      | USERNAME, PROJECT_DIR| "yourusername", "/home/yourusername/MiniREtk" | Sets runtime paths           |
 
 ---
 
@@ -142,5 +142,5 @@ EXIFTOOL_PATH = 'exiftool'
 
 - Download `pdfid.py` and `pdf-parser.py` from Didier Stevens’ blog. https://blog.didierstevens.com/programs/pdf-tools/
 - Use your own images for `background.jpg` and `logo.gif`.
-- The default install location is now `/home/$USERNAME/miniretk`.
+- The default install location is now `/home/$USERNAME/MiniREtk`.
 - The application runs headless and is accessible via browser on port 8080 of the device.

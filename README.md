@@ -39,7 +39,7 @@
 
 1. **Download Required Files**
    - Download `deployMiniREtk.sh`, `MiniREtk.py`, `pdfid.py`, and `pdf-parser.py`.
-   - Obtain or create your images: `background.jpg` and `logo.gif`.
+   - Obtain or create your images: `background.jpg` and `logo.gif`. (Or use the ones supplied)
 
 2. **Make the Installer Executable**
    ```bash

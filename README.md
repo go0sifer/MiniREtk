@@ -105,24 +105,12 @@ EXIFTOOL_PATH = 'exiftool'
 - The script will:
   - Update your OS and install dependencies.
   - Create the project directory at `/home/$USERNAME/MiniREtk` and its subfolders.
-  - Prompt you to copy scripts and images into the project directory.
   - Convert line endings and set executable permissions.
   - Set up the systemd service for automatic startup.
 
 ---
 
-### **3. Copy Required Files**
-
-- When prompted, copy the following into your project directory (`/home/yourusername/MiniREtk/`):
-  - `MiniREtk.py`
-  - `pdfid.py`
-  - `pdf-parser.py`
-  - `logo.gif`
-  - `background.jpg`
-
----
-
-### **4. Final Steps**
+### **3. Final Steps**
 
 - The script will finish setup and provide instructions for accessing the web interface.
 - For Raspberry Pi, it will attempt to set up AutoHotspot for WiFi fallback (this step will fail gracefully on non-Raspberry Pi systems).

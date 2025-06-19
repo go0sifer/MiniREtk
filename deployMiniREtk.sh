@@ -106,25 +106,10 @@ sudo systemctl daemon-reload
 sudo systemctl enable miniretk-analyzer
 sudo systemctl restart miniretk-analyzer
 
-# 8. (Optional) Install AutoHotspot if running on Raspberry Pi
-echo "[*] Checking if this is a Raspberry Pi for AutoHotspot install..."
-if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
-    echo "[*] Raspberry Pi detected. Installing AutoHotspot..."
-    curl "https://www.raspberryconnect.com/images/hsinstaller/Autohotspot-Setup.tar.xz" -o AutoHotspot-Setup.tar.xz
-    tar -xvJf AutoHotspot-Setup.tar.xz
-    cd Autohotspot
-    sudo ./autohotspot-setup.sh
-    cd ..
-else
-    echo "[*] Not a Raspberry Pi. Skipping AutoHotspot installation."
-fi
-
 echo
 echo "---- Setup Complete ----"
 echo "The Mini REtk Analyzer web interface should now be running on port 8080."
 echo "Access it at: http://<device-ip>:8080"
-echo "If no WiFi is available, connect to the Pi's hotspot and use the Pi's hotspot IP address."
 echo "To check the Mini REtk Analyzer service: sudo systemctl status miniretk-analyzer"
-echo "To check AutoHotspot: sudo systemctl status autohotspot"
 echo
 echo "Enjoy using Mini REtk Analyzer!"

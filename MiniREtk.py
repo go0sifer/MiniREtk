@@ -205,6 +205,8 @@ HTML_TEMPLATE = '''
             margin-top: 20px;
             overflow-x: auto;
             font-size: 1em;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         @media (max-width: 900px) {
             .container { padding: 10px; }
@@ -519,7 +521,7 @@ def run_script(script, filename):
     if script == 'pdfid':
         command = f'python3 {PDFID_PATH} "{filepath}"'
     elif script == 'pdfparser':
-        command = f'python3 {PDFPARSER_PATH} "{filepath}"'
+        command = f'python3 {PDFPARSER_PATH} -c "{filepath}"'
     elif script == 'exiftool':
         command = f'{EXIFTOOL_PATH} "{filepath}"'
     elif script == 'filecmd':

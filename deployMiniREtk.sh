@@ -24,7 +24,7 @@ sudo apt update && sudo apt upgrade -y
 
 # 2. Install required packages
 echo "[*] Installing Python, Flask, and forensic tools..."
-sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git dos2unix unzip
+sudo apt install -y python3 python3-flask python3-pip exiftool binutils file git dos2unix unzip poppler-utils python3-werkzeug
 
 # 3. Create project directories
 echo "[*] Creating project directories..."
@@ -35,16 +35,16 @@ cd "$PROJECT_DIR"
 missing=0
 
 check_and_warn() {
-    if [[ ! -f "$1" ]]; then
-        if [[ "$1" == "$LOGO_IMG" || "$1" == "$BG_IMG" ]]; then
-            echo "    [!] Optional: $1 not found. You can continue, but there will be no $( [[ "$1" == "$LOGO_IMG" ]] && echo "logo" || echo "background" )."
-        else
-            echo "    [!] Required: $1 is missing!"
-            missing=1
-        fi
+  if [[ ! -f "$1" ]]; then
+    if [[ "$1" == "$LOGO_IMG" || "$1" == "$BG_IMG" ]]; then
+      echo "    [!] Optional: $1 not found. You can continue, but there will be no $([[ "$1" == "$LOGO_IMG" ]] && echo "logo" || echo "background")."
     else
-        echo "    [+] Found: $1"
+      echo "    [!] Required: $1 is missing!"
+      missing=1
     fi
+  else
+    echo "    [+] Found: $1"
+  fi
 }
 
 echo "[*] Checking for required files in $PROJECT_DIR..."
@@ -55,27 +55,27 @@ check_and_warn "$LOGO_IMG"
 check_and_warn "$BG_IMG"
 
 if [[ $missing -eq 1 ]]; then
-    echo
-    echo "[!] One or more required files are missing. Please copy them to $PROJECT_DIR and press Enter to continue."
-    read -p ""
-    # Re-check after user input
-    missing=0
-    check_and_warn "$APP_SCRIPT"
-    check_and_warn "$PDFID_ZIP"
-    check_and_warn "$PDFPARSER_ZIP"
-    if [[ $missing -eq 1 ]]; then
-        echo "[!] Required files are still missing. Exiting setup."
-        exit 1
-    fi
+  echo
+  echo "[!] One or more required files are missing. Please copy them to $PROJECT_DIR and press Enter to continue."
+  read -p ""
+  # Re-check after user input
+  missing=0
+  check_and_warn "$APP_SCRIPT"
+  check_and_warn "$PDFID_ZIP"
+  check_and_warn "$PDFPARSER_ZIP"
+  if [[ $missing -eq 1 ]]; then
+    echo "[!] Required files are still missing. Exiting setup."
+    exit 1
+  fi
 fi
 
 # 5. Unzip PDF tools if needed
 echo "[*] Unzipping PDF tool archives..."
 if [[ -f "$PDFID_ZIP" ]]; then
-    unzip -o "$PDFID_ZIP"
+  unzip -o "$PDFID_ZIP"
 fi
 if [[ -f "$PDFPARSER_ZIP" ]]; then
-    unzip -o "$PDFPARSER_ZIP"
+  unzip -o "$PDFPARSER_ZIP"
 fi
 
 # 6. Convert line endings and make scripts executable
@@ -86,7 +86,7 @@ chmod +x "$APP_SCRIPT" "$PDFID_SCRIPT" "$PDFPARSER_SCRIPT" || true
 # 7. Set up systemd service
 echo "[*] Setting up systemd service..."
 SERVICE_FILE="/etc/systemd/system/miniretk-analyzer.service"
-sudo tee $SERVICE_FILE > /dev/null <<EOF
+sudo tee $SERVICE_FILE >/dev/null <<EOF
 [Unit]
 Description=Mini REtk Analyzer Service
 After=network.target

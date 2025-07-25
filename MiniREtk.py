@@ -8,16 +8,18 @@ LOGO_PATH = f"{PROJECT_DIR}/logo.gif"
 BG_PATH = f"{PROJECT_DIR}/background.jpg"
 PDFID_PATH = f"{PROJECT_DIR}/pdfid.py"
 PDFPARSER_PATH = f"{PROJECT_DIR}/pdf-parser.py"
-EXIFTOOL_PATH = 'exiftool'
+EXIFTOOL_PATH = "exiftool"
 # ==========================
 
-from flask import Flask, request, render_template_string, redirect, url_for, send_from_directory
-import os
-import subprocess
 import hashlib
-import shutil
 import math
+import os
+import shutil
+import subprocess
 from datetime import datetime
+
+from flask import (Flask, redirect, render_template_string, request,
+                   send_from_directory, url_for)
 
 app = Flask(__name__)
 
@@ -25,7 +27,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(ARCHIVE_FOLDER, exist_ok=True)
 os.makedirs(REPORTS_FOLDER, exist_ok=True)
 
-HTML_TEMPLATE = '''
+import glob
+import tempfile
+
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,11 +39,11 @@ HTML_TEMPLATE = '''
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --icon-default: #232323;       /* dark for tool icons */
-            --icon-delete: #e11d48;        /* red for delete */
-            --icon-archive: #232323;       /* dark for archive */
-            --icon-report: #3300cc;        /* purp for report */
-            --icon-hover: #cc0000;         /* red for hover */
+            --icon-default: #232323;
+            --icon-delete: #e11d48;
+            --icon-archive: #232323;
+            --icon-report: #3300cc;
+            --icon-hover: #cc0000;
         }
         body {
             font-family: 'Montserrat', sans-serif;
@@ -294,6 +299,16 @@ HTML_TEMPLATE = '''
                             <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><line x1="8" y1="6" x2="16" y2="6" stroke-width="2"/><line x1="8" y1="10" x2="16" y2="10" stroke-width="2"/><line x1="8" y1="14" x2="12" y2="14" stroke-width="2"/></svg>
                         </button>
                     </form>
+                    <form style="display:inline;" method="post" action="/generate_pdf_image/{{file}}" target="_blank">
+                      <input type="number" name="start_page" min="1" placeholder="Start" required style="width:55px;">
+                      <input type="number" name="end_page" min="1" placeholder="End" required style="width:55px;">
+                      <button type="submit" title="Preview PDF Pages">
+                        <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <rect x="5" y="5" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                          <text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">IMG</text>
+                        </svg>
+                      </button>
+                    </form>
                 {% endif %}
                 {% if not reports %}
                     <form style="display:inline;" method="post" action="/run/exiftool/{{file}}">
@@ -364,45 +379,51 @@ HTML_TEMPLATE = '''
     </div>
 </body>
 </html>
-'''
+"""
+
 
 def md5sum(filepath):
     h = hashlib.md5()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(8192), b''):
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 def sha1sum(filepath):
     h = hashlib.sha1()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(8192), b''):
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 def sha256sum(filepath):
     h = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(8192), b''):
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return h.hexdigest()
+
 
 def sha512sum(filepath):
     h = hashlib.sha512()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(8192), b''):
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return h.hexdigest()
 
+
 def human_readable_size(size, decimal_places=1):
-    for unit in ['bytes','KB','MB','GB','TB']:
+    for unit in ["bytes", "KB", "MB", "GB", "TB"]:
         if size < 1024.0:
             return f"{size:.{decimal_places}f} {unit}"
         size /= 1024.0
     return f"{size:.{decimal_places}f} PB"
 
+
 def calculate_entropy(filepath):
-    with open(filepath, 'rb') as f:
+    with open(filepath, "rb") as f:
         data = f.read()
     if not data:
         return 0.0
@@ -411,35 +432,39 @@ def calculate_entropy(filepath):
     for x in range(256):
         p_x = data.count(x) / length
         if p_x > 0:
-            entropy += - p_x * math.log2(p_x)
+            entropy += -p_x * math.log2(p_x)
     return entropy
+
 
 def get_file_details(filepath):
     size = os.path.getsize(filepath)
     human_size = human_readable_size(size)
     ext = os.path.splitext(filepath)[1]
     try:
-        mime_type = subprocess.check_output(['file', '--mime-type', '-b', filepath], universal_newlines=True).strip()
+        mime_type = subprocess.check_output(
+            ["file", "--mime-type", "-b", filepath], universal_newlines=True
+        ).strip()
     except Exception:
-        mime_type = 'unknown'
+        mime_type = "unknown"
     entropy = calculate_entropy(filepath)
     return size, human_size, mime_type, ext, entropy
+
 
 def get_report_path(filename):
     return os.path.join(REPORTS_FOLDER, f"{filename}.report.txt")
 
+
 def append_to_report(script, filename, output):
     report_path = get_report_path(filename)
-    # Try uploads first, then archive
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     original_path = file_path
     if not os.path.isfile(file_path):
         file_path = os.path.join(ARCHIVE_FOLDER, filename)
         original_path = file_path
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if not os.path.exists(report_path):
         size, human_size, mime_type, ext, entropy = get_file_details(file_path)
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(f"=== REPORT FOR: {filename} ===\n")
             f.write(f"MD5:     {md5sum(file_path)}\n")
             f.write(f"SHA1:    {sha1sum(file_path)}\n")
@@ -450,173 +475,298 @@ def append_to_report(script, filename, output):
             f.write(f"Extension: {ext}\n")
             f.write(f"Entropy: {entropy:.4f}\n")
             f.write(f"Original upload path: {original_path}\n")
-            f.write(f"VirusTotal: https://www.virustotal.com/gui/file/{sha256sum(file_path)}\n")
+            f.write(
+                f"VirusTotal: https://www.virustotal.com/gui/file/{sha256sum(file_path)}\n"
+            )
             f.write(f"First Analysis: {now}\n")
             f.write("=" * 40 + "\n")
 
     file_hash = sha256sum(file_path) if os.path.isfile(file_path) else "N/A"
     unique_block = f"SCRIPT: {script}\nFILE: {filename}\nHASH: {file_hash}\n---\n"
-    with open(report_path, 'r', encoding='utf-8') as f:
+    with open(report_path, "r", encoding="utf-8") as f:
         content = f.read()
         if unique_block in content:
             return
 
-    header = f"\n--- {now} ---\nSCRIPT: {script}\nFILE: {filename}\nHASH: {file_hash}\n---\n"
-    with open(report_path, 'a', encoding='utf-8') as f:
+    header = (
+        f"\n--- {now} ---\nSCRIPT: {script}\nFILE: {filename}\nHASH: {file_hash}\n---\n"
+    )
+    with open(report_path, "a", encoding="utf-8") as f:
         f.write(header)
         f.write(output)
-        f.write('\n')
+        f.write("\n")
 
-@app.route('/', methods=['GET', 'POST'])
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == 'POST':
-        if 'file' in request.files:
-            file = request.files['file']
+    if request.method == "POST":
+        if "file" in request.files:
+            file = request.files["file"]
             if file.filename:
                 filepath = os.path.join(UPLOAD_FOLDER, file.filename)
                 file.save(filepath)
-                return redirect(url_for('index'))
+                return redirect(url_for("index"))
 
-    files = [f for f in os.listdir(UPLOAD_FOLDER) if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))]
+    files = [
+        f
+        for f in os.listdir(UPLOAD_FOLDER)
+        if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))
+    ]
     hashes = {f: sha256sum(os.path.join(UPLOAD_FOLDER, f)) for f in files}
-    return render_template_string(HTML_TEMPLATE, files=files, output=None, hashes=hashes, archive=False, reports=False)
+    return render_template_string(
+        HTML_TEMPLATE,
+        files=files,
+        output=None,
+        hashes=hashes,
+        archive=False,
+        reports=False,
+    )
 
-@app.route('/archive')
+
+@app.route("/archive")
 def view_archive():
-    files = [f for f in os.listdir(ARCHIVE_FOLDER) if os.path.isfile(os.path.join(ARCHIVE_FOLDER, f))]
-    return render_template_string(HTML_TEMPLATE, files=files, output=None, hashes={}, archive=True, reports=False)
+    files = [
+        f
+        for f in os.listdir(ARCHIVE_FOLDER)
+        if os.path.isfile(os.path.join(ARCHIVE_FOLDER, f))
+    ]
+    return render_template_string(
+        HTML_TEMPLATE, files=files, output=None, hashes={}, archive=True, reports=False
+    )
 
-@app.route('/reports')
+
+@app.route("/reports")
 def view_reports():
-    files = [f for f in os.listdir(REPORTS_FOLDER) if os.path.isfile(os.path.join(REPORTS_FOLDER, f))]
-    return render_template_string(HTML_TEMPLATE, files=files, output=None, hashes={}, archive=False, reports=True)
+    files = [
+        f
+        for f in os.listdir(REPORTS_FOLDER)
+        if os.path.isfile(os.path.join(REPORTS_FOLDER, f))
+    ]
+    return render_template_string(
+        HTML_TEMPLATE, files=files, output=None, hashes={}, archive=False, reports=True
+    )
 
-@app.route('/uploads/<filename>')
+
+@app.route("/uploads/<filename>")
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-@app.route('/archivefile/<filename>')
+
+@app.route("/archivefile/<filename>")
 def archive_file(filename):
     return send_from_directory(ARCHIVE_FOLDER, filename)
 
-@app.route('/reportsfile/<filename>')
+
+@app.route("/reportsfile/<filename>")
 def report_file(filename):
     return send_from_directory(REPORTS_FOLDER, filename)
 
-@app.route('/logo.gif')
+
+@app.route("/logo.gif")
 def logo():
-    return send_from_directory(PROJECT_DIR, 'logo.gif')
+    return send_from_directory(PROJECT_DIR, "logo.gif")
 
-@app.route('/background.jpg')
+
+@app.route("/background.jpg")
 def background():
-    return send_from_directory(PROJECT_DIR, 'background.jpg')
+    return send_from_directory(PROJECT_DIR, "background.jpg")
 
-@app.route('/run/<script>/<filename>', methods=['POST'])
+
+@app.route("/run/<script>/<filename>", methods=["POST"])
 def run_script(script, filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     if not os.path.isfile(filepath):
         return "File not found", 404
 
     output = None
-    if script == 'pdfid':
+    if script == "pdfid":
         command = f'python3 {PDFID_PATH} "{filepath}"'
-    elif script == 'pdfparser':
+    elif script == "pdfparser":
         command = f'python3 {PDFPARSER_PATH} -c "{filepath}"'
-    elif script == 'exiftool':
+    elif script == "exiftool":
         command = f'{EXIFTOOL_PATH} "{filepath}"'
-    elif script == 'filecmd':
+    elif script == "filecmd":
         command = f'file "{filepath}"'
-    elif script == 'strings':
+    elif script == "strings":
         command = f'strings "{filepath}"'
     else:
         output = "Invalid script"
 
     if output is None:
         try:
-            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, timeout=300, universal_newlines=True)
+            output = subprocess.check_output(
+                command,
+                shell=True,
+                stderr=subprocess.STDOUT,
+                timeout=300,
+                universal_newlines=True,
+            )
             append_to_report(script, filename, output)
         except subprocess.CalledProcessError as e:
             output = f"Error: {e.output}"
         except Exception as e:
             output = str(e)
 
-    files = [f for f in os.listdir(UPLOAD_FOLDER) if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))]
+    files = [
+        f
+        for f in os.listdir(UPLOAD_FOLDER)
+        if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))
+    ]
     hashes = {f: sha256sum(os.path.join(UPLOAD_FOLDER, f)) for f in files}
-    return render_template_string(HTML_TEMPLATE, files=files, output=output, hashes=hashes, archive=False, reports=False)
+    return render_template_string(
+        HTML_TEMPLATE,
+        files=files,
+        output=output,
+        hashes=hashes,
+        archive=False,
+        reports=False,
+    )
 
-@app.route('/run_archive/strings/<filename>', methods=['POST'])
+
+@app.route("/run_archive/strings/<filename>", methods=["POST"])
 def run_archive_strings(filename):
     filepath = os.path.join(ARCHIVE_FOLDER, filename)
     if not os.path.isfile(filepath):
         return "File not found", 404
     try:
-        output = subprocess.check_output(f'strings "{filepath}"', shell=True, stderr=subprocess.STDOUT, timeout=300, universal_newlines=True)
-        append_to_report('strings', filename, output)
+        output = subprocess.check_output(
+            f'strings "{filepath}"',
+            shell=True,
+            stderr=subprocess.STDOUT,
+            timeout=300,
+            universal_newlines=True,
+        )
+        append_to_report("strings", filename, output)
     except subprocess.CalledProcessError as e:
         output = f"Error: {e.output}"
     except Exception as e:
         output = str(e)
-    files = [f for f in os.listdir(ARCHIVE_FOLDER) if os.path.isfile(os.path.join(ARCHIVE_FOLDER, f))]
-    return render_template_string(HTML_TEMPLATE, files=files, output=output, hashes={}, archive=True, reports=False)
+    files = [
+        f
+        for f in os.listdir(ARCHIVE_FOLDER)
+        if os.path.isfile(os.path.join(ARCHIVE_FOLDER, f))
+    ]
+    return render_template_string(
+        HTML_TEMPLATE,
+        files=files,
+        output=output,
+        hashes={},
+        archive=True,
+        reports=False,
+    )
 
-@app.route('/archive/<filename>', methods=['POST'])
+
+@app.route("/archive/<filename>", methods=["POST"])
 def archive(filename):
     src = os.path.join(UPLOAD_FOLDER, filename)
     dst = os.path.join(ARCHIVE_FOLDER, filename)
     if os.path.isfile(src):
         shutil.move(src, dst)
-        out_txt_src = src + '.out.txt'
-        out_txt_dst = dst + '.out.txt'
+        out_txt_src = src + ".out.txt"
+        out_txt_dst = dst + ".out.txt"
         if os.path.isfile(out_txt_src):
             shutil.move(out_txt_src, out_txt_dst)
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
-@app.route('/unarchive/<filename>', methods=['POST'])
+
+@app.route("/unarchive/<filename>", methods=["POST"])
 def unarchive(filename):
     src = os.path.join(ARCHIVE_FOLDER, filename)
     dst = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.isfile(src):
         shutil.move(src, dst)
-        out_txt_src = src + '.out.txt'
-        out_txt_dst = dst + '.out.txt'
+        out_txt_src = src + ".out.txt"
+        out_txt_dst = dst + ".out.txt"
         if os.path.isfile(out_txt_src):
             shutil.move(out_txt_src, out_txt_dst)
-    return redirect(url_for('view_archive'))
+    return redirect(url_for("view_archive"))
 
-@app.route('/delete/<filename>', methods=['POST'])
+
+@app.route("/delete/<filename>", methods=["POST"])
 def delete_file(filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.isfile(filepath):
         os.remove(filepath)
-        outpath = filepath + '.out.txt'
+        outpath = filepath + ".out.txt"
         if os.path.isfile(outpath):
             os.remove(outpath)
-        # Delete report file
         report_path = os.path.join(REPORTS_FOLDER, f"{filename}.report.txt")
         if os.path.isfile(report_path):
             os.remove(report_path)
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
-@app.route('/delete_archive/<filename>', methods=['POST'])
+
+@app.route("/delete_archive/<filename>", methods=["POST"])
 def delete_archive_file(filename):
     filepath = os.path.join(ARCHIVE_FOLDER, filename)
     if os.path.isfile(filepath):
         os.remove(filepath)
-        outpath = filepath + '.out.txt'
+        outpath = filepath + ".out.txt"
         if os.path.isfile(outpath):
             os.remove(outpath)
-        # Delete report file
         report_path = os.path.join(REPORTS_FOLDER, f"{filename}.report.txt")
         if os.path.isfile(report_path):
             os.remove(report_path)
-    return redirect(url_for('view_archive'))
+    return redirect(url_for("view_archive"))
 
-@app.route('/delete_report/<path:filename>', methods=['POST'])
+
+@app.route("/delete_report/<path:filename>", methods=["POST"])
 def delete_report_file_route(filename):
     report_path = os.path.join(REPORTS_FOLDER, filename)
     if os.path.isfile(report_path):
         os.remove(report_path)
-    return redirect(url_for('view_reports'))
+    return redirect(url_for("view_reports"))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+
+@app.route("/generate_pdf_image/<filename>", methods=["POST"])
+def generate_pdf_image(filename):
+    start_page = request.form.get("start_page")
+    end_page = request.form.get("end_page")
+    if not (start_page and end_page and start_page.isdigit() and end_page.isdigit()):
+        return "Invalid page range", 400
+    start_page, end_page = int(start_page), int(end_page)
+    if start_page > end_page or start_page < 1:
+        return "Invalid page range", 400
+    src_path = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.isfile(src_path) or not filename.lower().endswith(".pdf"):
+        return "PDF not found", 404
+    tempdir = tempfile.mkdtemp(prefix="pdfimg_")
+    out_prefix = os.path.join(tempdir, f"{filename}_page")
+    command = [
+        "pdftocairo",
+        "-jpeg",
+        "-f",
+        str(start_page),
+        "-l",
+        str(end_page),
+        src_path,
+        out_prefix,
+    ]
+    try:
+        subprocess.run(command, check=True, timeout=60)
+    except Exception as e:
+        return f"Failed to generate images: {e}", 500
+    images = sorted(
+        f for f in os.listdir(tempdir) if f.endswith(".jpg") or f.endswith(".jpeg")
+    )
+    img_html = "".join(
+        f'<div style="margin:14px 0;"><a href="/pdf_imagefile/{os.path.basename(tempdir)}/{img}" target="_blank">{img}</a><br>'
+        f'<img src="/pdf_imagefile/{os.path.basename(tempdir)}/{img}" width="350"></div>'
+        for img in images
+    )
+    return (
+        f"<h2>Image Previews for {filename}</h2>{img_html}"
+        if images
+        else "No images generated for that range."
+    )
+
+
+@app.route("/pdf_imagefile/<folder>/<image>")
+def send_pdf_image(folder, image):
+    temp_base = "/tmp"
+    dir_path = os.path.join(temp_base, folder)
+    return send_from_directory(dir_path, image)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)

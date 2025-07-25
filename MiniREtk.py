@@ -11,24 +11,28 @@ PDFPARSER_PATH = f"{PROJECT_DIR}/pdf-parser.py"
 EXIFTOOL_PATH = "exiftool"
 # ==========================
 
-import hashlib
-import math
+from flask import (
+    Flask,
+    request,
+    render_template_string,
+    redirect,
+    url_for,
+    send_from_directory,
+)
 import os
-import shutil
 import subprocess
+import hashlib
+import shutil
+import math
 from datetime import datetime
-
-from flask import (Flask, redirect, render_template_string, request,
-                   send_from_directory, url_for)
+import tempfile
+import glob
 
 app = Flask(__name__)
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(ARCHIVE_FOLDER, exist_ok=True)
 os.makedirs(REPORTS_FOLDER, exist_ok=True)
-
-import glob
-import tempfile
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -53,176 +57,32 @@ HTML_TEMPLATE = """
             margin: 0;
             min-height: 100vh;
         }
-        .container {
-            max-width: 900px;
-            margin: 40px auto 0 auto;
-            background: rgba(30, 30, 48, 0.97);
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            padding: 32px 36px 36px 36px;
-        }
-        .logo {
-            display: block;
-            margin: 0 auto 20px auto;
-            width: 120px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #0008;
-        }
-        .top-buttons {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 12px;
-        }
-        .top-buttons a {
-            margin-left: 8px;
-        }
-        .top-btn, .archive-btn, .reports-btn {
-            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
-            color: #232323;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 18px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 8px #0004;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .top-btn:hover, .archive-btn:hover, .reports-btn:hover {
-            background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%);
-            color: #232323;
-            text-decoration: none;
-        }
-        h1 {
-            text-align: center;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        h2 {
-            margin-top: 36px;
-            font-weight: 700;
-            color: #006600;
-        }
-        form.upload-form {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 22px;
-        }
-        input[type="file"] {
-            color: #fff;
-        }
-        input[type="submit"], button, .icon-btn-link {
-            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
-            color: #232323;
-            border: none;
-            border-radius: 8px;
-            padding: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-left: 8px;
-            transition: box-shadow 0.2s, background 0.2s;
-            box-shadow: 0 2px 8px #0004;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            min-width: 38px;
-            min-height: 38px;
-        }
-        input[type="submit"]:hover, button:hover, .icon-btn-link:hover {
-            background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%);
-            box-shadow: 0 4px 16px #0006;
-            color: #232323;
-            text-decoration: none;
-        }
-        .hash-btn {
-            min-width: 38px;
-            min-height: 38px;
-            padding: 8px;
-            background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
-            color: #232323;
-            border: none;
-            font-size: 0.9rem;
-            font-family: monospace;
-            font-weight: 600;
-            border-radius: 8px;
-            margin-left: 8px;
-            text-decoration: none;
-        }
-        .hash-btn:hover {
-            background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%);
-            color: #232323;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            background: rgba(255,255,255,0.04);
-            margin: 10px 0;
-            padding: 12px 16px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        li a.filename-link {
-            color: #00cc00;
-            font-weight: 600;
-            text-decoration: none;
-            margin-right: 18px;
-            flex-grow: 1;
-            word-break: break-all;
-        }
-        li a.filename-link:hover {
-            text-decoration: underline;
-        }
-        .button-group {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        .icon-btn {
-            width: 22px;
-            height: 22px;
-            vertical-align: middle;
-            display: block;
-            margin: 0;
-            color: var(--icon-default);
-            transition: color 0.2s;
-        }
+        .container { max-width: 900px; margin: 40px auto 0 auto; background: rgba(30, 30, 48, 0.97); border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); padding: 32px 36px 36px 36px; }
+        .logo { display: block; margin: 0 auto 20px auto; width: 120px; border-radius: 12px; box-shadow: 0 2px 8px #0008; }
+        .top-buttons { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+        .top-buttons a { margin-left: 8px; }
+        .top-btn, .archive-btn, .reports-btn { background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); color: #232323; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px #0004; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+        .top-btn:hover, .archive-btn:hover, .reports-btn:hover { background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%); color: #232323; text-decoration: none; }
+        h1 { text-align: center; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+        h2 { margin-top: 36px; font-weight: 700; color: #006600; }
+        form.upload-form { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 22px; }
+        input[type="file"] { color: #fff; }
+        input[type="submit"], button, .icon-btn-link { background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); color: #232323; border: none; border-radius: 8px; padding: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-left: 8px; transition: box-shadow 0.2s, background 0.2s; box-shadow: 0 2px 8px #0004; display: flex; align-items: center; justify-content: center; text-decoration: none; min-width: 38px; min-height: 38px; }
+        input[type="submit"]:hover, button:hover, .icon-btn-link:hover { background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%); box-shadow: 0 4px 16px #0006; color: #232323; text-decoration: none; }
+        .hash-btn { min-width: 38px; min-height: 38px; padding: 8px; background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%); color: #232323; border: none; font-size: 0.9rem; font-family: monospace; font-weight: 600; border-radius: 8px; margin-left: 8px; text-decoration: none; }
+        .hash-btn:hover { background: linear-gradient(90deg, #22c55e 0%, #65a30d 100%); color: #232323; }
+        ul { list-style: none; padding: 0; }
+        li { background: rgba(255,255,255,0.04); margin: 10px 0; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+        li a.filename-link { color: #00cc00; font-weight: 600; text-decoration: none; margin-right: 18px; flex-grow: 1; word-break: break-all; }
+        li a.filename-link:hover { text-decoration: underline; }
+        .button-group { display: flex; gap: 8px; flex-shrink: 0; }
+        .icon-btn { width: 22px; height: 22px; vertical-align: middle; display: block; margin: 0; color: var(--icon-default); transition: color 0.2s; }
         .delete-btn .icon-btn { color: var(--icon-delete); }
         .archive-btn .icon-btn { color: var(--icon-archive); }
         .reports-btn .icon-btn { color: var(--icon-report); }
         .icon-btn:hover { color: var(--icon-hover); }
-        pre {
-            background: #23233a;
-            color: #fffde7;
-            border-radius: 8px;
-            padding: 18px;
-            margin-top: 20px;
-            overflow-x: auto;
-            font-size: 1em;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        @media (max-width: 900px) {
-            .container { padding: 10px; }
-            li {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .button-group {
-                margin-top: 8px;
-            }
-        }
+        pre { background: #23233a; color: #fffde7; border-radius: 8px; padding: 18px; margin-top: 20px; overflow-x: auto; font-size: 1em; white-space: pre-wrap; word-break: break-word; }
+        @media (max-width: 900px) { .container { padding: 10px; } li { flex-direction: column; align-items: flex-start; } .button-group { margin-top: 8px; } }
     </style>
 </head>
 <body>
@@ -300,12 +160,10 @@ HTML_TEMPLATE = """
                         </button>
                     </form>
                     <form style="display:inline;" method="post" action="/generate_pdf_image/{{file}}" target="_blank">
-                      <input type="number" name="start_page" min="1" placeholder="Start" required style="width:55px;">
-                      <input type="number" name="end_page" min="1" placeholder="End" required style="width:55px;">
-                      <button type="submit" title="Preview PDF Pages">
+                      <button type="submit" title="Generate Preview Images">
                         <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <rect x="5" y="5" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
-                          <text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">IMG</text>
+                          <text x="12" y="16" font-size="8" fill="currentColor" text-anchor="middle" font-family="monospace">IMG</text>
                         </svg>
                       </button>
                     </form>
@@ -720,30 +578,14 @@ def delete_report_file_route(filename):
 
 @app.route("/generate_pdf_image/<filename>", methods=["POST"])
 def generate_pdf_image(filename):
-    start_page = request.form.get("start_page")
-    end_page = request.form.get("end_page")
-    if not (start_page and end_page and start_page.isdigit() and end_page.isdigit()):
-        return "Invalid page range", 400
-    start_page, end_page = int(start_page), int(end_page)
-    if start_page > end_page or start_page < 1:
-        return "Invalid page range", 400
     src_path = os.path.join(UPLOAD_FOLDER, filename)
     if not os.path.isfile(src_path) or not filename.lower().endswith(".pdf"):
         return "PDF not found", 404
     tempdir = tempfile.mkdtemp(prefix="pdfimg_")
     out_prefix = os.path.join(tempdir, f"{filename}_page")
-    command = [
-        "pdftocairo",
-        "-jpeg",
-        "-f",
-        str(start_page),
-        "-l",
-        str(end_page),
-        src_path,
-        out_prefix,
-    ]
+    command = ["pdftocairo", "-jpeg", src_path, out_prefix]
     try:
-        subprocess.run(command, check=True, timeout=60)
+        subprocess.run(command, check=True, timeout=120)
     except Exception as e:
         return f"Failed to generate images: {e}", 500
     images = sorted(
@@ -755,9 +597,9 @@ def generate_pdf_image(filename):
         for img in images
     )
     return (
-        f"<h2>Image Previews for {filename}</h2>{img_html}"
+        f"<h2>All Image Previews for {filename}</h2>{img_html}"
         if images
-        else "No images generated for that range."
+        else "No images generated."
     )
 
 

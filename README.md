@@ -1,20 +1,23 @@
 ```
-     _____                              _____        _____                     
- ___|    _|__  ____  ____   _  ____  __|__   |__  __|___  |__    __    __  __  
-|    \  /  | ||    ||    \ | ||    ||     |     ||   ___|    | _|  |_ |  |/ /  
-|     \/   | ||    ||     \| ||    ||     \     ||   ___|    ||_    _||     \  
-|__/\__/|__|_||____||__/\____||____||__|\__\  __||______|  __|  |__|  |__|\__\ 
-    |_____|                            |_____|      |_____|                    
-                                                                               
-01001101  01101001  01101110  01101001  01010010  01000101  01110100  01101011  
+     _____                              _____        _____
+ ___|    _|__  ____  ____   _  ____  __|__   |__  __|___  |__    __    __  __
+|    \  /  | ||    ||    \ | ||    ||     |     ||   ___|    | _|  |_ |  |/ /
+|     \/   | ||    ||     \| ||    ||     \     ||   ___|    ||_    _||     \
+|__/\__/|__|_||____||__/\____||____||__|\__\  __||______|  __|  |__|  |__|\__\
+    |_____|                            |_____|      |_____|
+
+01001101  01101001  01101110  01101001  01010010  01000101  01110100  01101011
 ```
+
 ## 📝 **Summary: Mini REtk Analyzer**
 
 **Mini REtk Analyzer** is a web-based forensic file analysis platform built with Flask. It allows users to upload files, analyze them with common forensic tools, archive/unarchive files, and generate detailed, deduplicated per-file reports. The tool is designed for security analysts, incident responders, and forensic investigators.
 
 ### **Key Features**
+
 - **File Uploads:** Upload any file for analysis. (Note: Original file system timestamps cannot be preserved via browser upload.)
 - **Analysis Tools:** Run `pdfid.py`, `pdf-parser.py`, `exiftool`, `file`, and `strings` on any file with a single click.
+- Safe Viewing: Uses poppler-utils to generate images of PDFs without opening them.
 - **Hashing:** Computes and displays MD5, SHA1, SHA256, and SHA512 hashes for each file.
 - **File Metadata:** Reports include file size (bytes and human-readable), MIME type, extension, entropy, and original upload path.
 - **VirusTotal Link:** Each report includes a direct VirusTotal scan link using the SHA256 hash.
@@ -26,13 +29,15 @@
 - **Automatic WiFi Access Point setup:** If the device cannot connect to a known WiFi network on boot, it will automatically create its own WiFi access point (hotspot), allowing direct connection to the device and access to the web app. This ensures you can always connect to Mini REtk, even in environments without existing WiFi.
 
 ### **Workflow**
+
 1. **Upload a file.**
 2. **Analyze:** Click any tool button to run an analysis. Output is shown on-screen and appended to the report (deduplicated).
 3. **Archive/Unarchive:** Move files in/out of the archive as needed.
 4. **Reports:** Download or view detailed per-file reports at any time.
 
 ### **Speedrun**
- - View the speedrun of the app here: https://youtu.be/Dl0Pyo-j40A
+
+- View the speedrun of the app here: https://youtu.be/Dl0Pyo-j40A
 
 ## **Deploy**
 
@@ -43,6 +48,7 @@
    - Obtain or create your images: `background.jpg` and `logo.gif`. (Or use the ones supplied)
 
 2. **Make the Installer Executable**
+
    ```bash
    chmod +x deployMiniREtk.sh
    ```
@@ -59,6 +65,7 @@
 #### **In `deployMiniREtk.sh`:**
 
 At the top of the script, you will see:
+
 ```bash
 # ====== USER CONFIG =======
 USERNAME="go0se"
@@ -70,12 +77,14 @@ LOGO_IMG="logo.gif"
 BG_IMG="background.jpg"
 # ==========================
 ```
+
 - **Change `USERNAME`** to your system username (e.g., `"yourusername"`).
 - **`PROJECT_DIR`** is now set to `/home/$USERNAME/MiniREtk` by default. Change only if you want a different location.
 
 #### **In `MiniREtk.py`:**
 
 At the top, look for:
+
 ```python
 # ====== USER CONFIG =======
 USERNAME = "go0se"
@@ -90,6 +99,7 @@ PDFPARSER_PATH = f"{PROJECT_DIR}/pdf-parser.py"
 EXIFTOOL_PATH = 'exiftool'
 # ==========================
 ```
+
 - **Change `USERNAME`** to match what you set in the shell script.
 - **`PROJECT_DIR`** should be `/home/yourusername/MiniREtk` unless you have a reason to change it.
 
@@ -120,10 +130,10 @@ EXIFTOOL_PATH = 'exiftool'
 
 ## **Summary Table: Where to Edit Configs**
 
-| File             | Variable(s) to Edit   | Example Value                    | Purpose                      |
-|------------------|----------------------|----------------------------------|------------------------------|
-| deployMiniREtk.sh| USERNAME, PROJECT_DIR| "yourusername", "/home/yourusername/MiniREtk" | Sets install location        |
-| MiniREtk.py      | USERNAME, PROJECT_DIR| "yourusername", "/home/yourusername/MiniREtk" | Sets runtime paths           |
+| File              | Variable(s) to Edit   | Example Value                                 | Purpose               |
+| ----------------- | --------------------- | --------------------------------------------- | --------------------- |
+| deployMiniREtk.sh | USERNAME, PROJECT_DIR | "yourusername", "/home/yourusername/MiniREtk" | Sets install location |
+| MiniREtk.py       | USERNAME, PROJECT_DIR | "yourusername", "/home/yourusername/MiniREtk" | Sets runtime paths    |
 
 ---
 

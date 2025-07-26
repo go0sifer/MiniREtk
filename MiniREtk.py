@@ -36,9 +36,8 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <title>Mini REtk Analyzer</title>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; background: url('/background.jpg') no-repeat center center fixed; background-size: cover; color: #f3f3f3; margin: 0; min-height: 100vh;}
+        body { font-family: 'Arial', sans-serif; background: url('/background.jpg') no-repeat center center fixed; background-size: cover; color: #f3f3f3; margin: 0; min-height: 100vh;}
         .container { max-width: 900px; margin: 40px auto 0 auto; background: rgba(30, 30, 48, 0.97); border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); padding: 32px 36px 36px 36px; }
         .logo { display: block; margin: 0 auto 20px auto; width: 120px; border-radius: 12px; box-shadow: 0 2px 8px #0008; }
         .top-buttons { display: flex; justify-content: flex-end; margin-bottom: 12px; }

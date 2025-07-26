@@ -177,15 +177,6 @@ HTML_TEMPLATE = """
                             </svg>
                         </button>
                     </form>
-                {% else %}
-                    <form style="display:inline;" method="post" action="/run_archive/strings/{{file}}">
-                        <button type="submit" title="Run strings (archive)">
-                            <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2"/>
-                                <text x="12" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace">S</text>
-                            </svg>
-                        </button>
-                    </form>
                 {% endif %}
                 {% if not reports %}
                     <a class="icon-btn-link" href="{{ '/archivefile/' + file if archive else '/uploads/' + file }}" download title="Download">

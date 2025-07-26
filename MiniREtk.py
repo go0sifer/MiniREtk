@@ -20,14 +20,9 @@ import subprocess
 import tempfile
 from datetime import datetime
 
-from flask import (
-    Flask,
-    redirect,
-    render_template_string,
-    request,
-    send_from_directory,
-    url_for,
-)
+from flask import (Flask, redirect, render_template_string, request,
+                   send_from_directory, url_for)
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -339,7 +334,8 @@ def index():
         if "file" in request.files:
             file = request.files["file"]
             if file.filename:
-                filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(filepath)
                 return redirect(url_for("index"))
 
@@ -385,16 +381,19 @@ def view_reports():
 
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
+    filename = secure_filename(filename)
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 @app.route("/archivefile/<filename>")
 def archive_file(filename):
+    filename = secure_filename(filename)
     return send_from_directory(ARCHIVE_FOLDER, filename)
 
 
 @app.route("/reportsfile/<filename>")
 def report_file(filename):
+    filename = secure_filename(filename)
     return send_from_directory(REPORTS_FOLDER, filename)
 
 
@@ -410,21 +409,22 @@ def background():
 
 @app.route("/run/<script>/<filename>", methods=["POST"])
 def run_script(script, filename):
+    filename = secure_filename(filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     if not os.path.isfile(filepath):
         return "File not found", 404
 
     output = None
     if script == "pdfid":
-        command = f'python3 {PDFID_PATH} "{filepath}"'
+        command = ["python3", PDFID_PATH, filepath]
     elif script == "pdfparser":
-        command = f'python3 {PDFPARSER_PATH} -c "{filepath}"'
+        command = ["python3", PDFPARSER_PATH, "-c", filepath]
     elif script == "exiftool":
-        command = f'{EXIFTOOL_PATH} "{filepath}"'
+        command = [EXIFTOOL_PATH, filepath]
     elif script == "filecmd":
-        command = f'file "{filepath}"'
+        command = ["file", filepath]
     elif script == "strings":
-        command = f'strings "{filepath}"'
+        command = ["strings", filepath]
     else:
         output = "Invalid script"
 
@@ -432,7 +432,6 @@ def run_script(script, filename):
         try:
             output = subprocess.check_output(
                 command,
-                shell=True,
                 stderr=subprocess.STDOUT,
                 timeout=300,
                 universal_newlines=True,
@@ -461,13 +460,13 @@ def run_script(script, filename):
 
 @app.route("/run_archive/strings/<filename>", methods=["POST"])
 def run_archive_strings(filename):
+    filename = secure_filename(filename)
     filepath = os.path.join(ARCHIVE_FOLDER, filename)
     if not os.path.isfile(filepath):
         return "File not found", 404
     try:
         output = subprocess.check_output(
-            f'strings "{filepath}"',
-            shell=True,
+            ["strings", filepath],
             stderr=subprocess.STDOUT,
             timeout=300,
             universal_newlines=True,
@@ -494,6 +493,7 @@ def run_archive_strings(filename):
 
 @app.route("/archive/<filename>", methods=["POST"])
 def archive(filename):
+    filename = secure_filename(filename)
     src = os.path.join(UPLOAD_FOLDER, filename)
     dst = os.path.join(ARCHIVE_FOLDER, filename)
     if os.path.isfile(src):
@@ -507,6 +507,7 @@ def archive(filename):
 
 @app.route("/unarchive/<filename>", methods=["POST"])
 def unarchive(filename):
+    filename = secure_filename(filename)
     src = os.path.join(ARCHIVE_FOLDER, filename)
     dst = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.isfile(src):
@@ -520,6 +521,7 @@ def unarchive(filename):
 
 @app.route("/delete/<filename>", methods=["POST"])
 def delete_file(filename):
+    filename = secure_filename(filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.isfile(filepath):
         os.remove(filepath)
@@ -534,6 +536,7 @@ def delete_file(filename):
 
 @app.route("/delete_archive/<filename>", methods=["POST"])
 def delete_archive_file(filename):
+    filename = secure_filename(filename)
     filepath = os.path.join(ARCHIVE_FOLDER, filename)
     if os.path.isfile(filepath):
         os.remove(filepath)
@@ -548,6 +551,7 @@ def delete_archive_file(filename):
 
 @app.route("/delete_report/<path:filename>", methods=["POST"])
 def delete_report_file_route(filename):
+    filename = secure_filename(filename)
     report_path = os.path.join(REPORTS_FOLDER, filename)
     if os.path.isfile(report_path):
         os.remove(report_path)
@@ -556,6 +560,7 @@ def delete_report_file_route(filename):
 
 @app.route("/generate_pdf_image/<filename>", methods=["POST"])
 def generate_pdf_image(filename):
+    filename = secure_filename(filename)
     src_path = os.path.join(UPLOAD_FOLDER, filename)
     if not os.path.isfile(src_path) or not filename.lower().endswith(".pdf"):
         output = "PDF not found"
@@ -608,6 +613,8 @@ def generate_pdf_image(filename):
 
 @app.route("/pdf_imagefile/<folder>/<image>")
 def send_pdf_image(folder, image):
+    folder = secure_filename(folder)
+    image = secure_filename(image)
     temp_base = "/tmp"
     dir_path = os.path.join(temp_base, folder)
     return send_from_directory(dir_path, image)

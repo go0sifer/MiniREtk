@@ -11,22 +11,23 @@ PDFPARSER_PATH = f"{PROJECT_DIR}/pdf-parser.py"
 EXIFTOOL_PATH = "exiftool"
 # ==========================
 
+import glob
+import hashlib
+import math
+import os
+import shutil
+import subprocess
+import tempfile
+from datetime import datetime
+
 from flask import (
     Flask,
-    request,
-    render_template_string,
     redirect,
-    url_for,
+    render_template_string,
+    request,
     send_from_directory,
+    url_for,
 )
-import os
-import subprocess
-import hashlib
-import shutil
-import math
-from datetime import datetime
-import tempfile
-import glob
 
 app = Flask(__name__)
 
@@ -42,21 +43,7 @@ HTML_TEMPLATE = """
     <title>Mini REtk Analyzer</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --icon-default: #232323;
-            --icon-delete: #e11d48;
-            --icon-archive: #232323;
-            --icon-report: #3300cc;
-            --icon-hover: #cc0000;
-        }
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: url('/background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #f3f3f3;
-            margin: 0;
-            min-height: 100vh;
-        }
+        body { font-family: 'Montserrat', sans-serif; background: url('/background.jpg') no-repeat center center fixed; background-size: cover; color: #f3f3f3; margin: 0; min-height: 100vh;}
         .container { max-width: 900px; margin: 40px auto 0 auto; background: rgba(30, 30, 48, 0.97); border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); padding: 32px 36px 36px 36px; }
         .logo { display: block; margin: 0 auto 20px auto; width: 120px; border-radius: 12px; box-shadow: 0 2px 8px #0008; }
         .top-buttons { display: flex; justify-content: flex-end; margin-bottom: 12px; }
@@ -76,11 +63,11 @@ HTML_TEMPLATE = """
         li a.filename-link { color: #00cc00; font-weight: 600; text-decoration: none; margin-right: 18px; flex-grow: 1; word-break: break-all; }
         li a.filename-link:hover { text-decoration: underline; }
         .button-group { display: flex; gap: 8px; flex-shrink: 0; }
-        .icon-btn { width: 22px; height: 22px; vertical-align: middle; display: block; margin: 0; color: var(--icon-default); transition: color 0.2s; }
-        .delete-btn .icon-btn { color: var(--icon-delete); }
-        .archive-btn .icon-btn { color: var(--icon-archive); }
-        .reports-btn .icon-btn { color: var(--icon-report); }
-        .icon-btn:hover { color: var(--icon-hover); }
+        .icon-btn { width: 22px; height: 22px; vertical-align: middle; display: block; margin: 0; color: #232323; transition: color 0.2s; }
+        .delete-btn .icon-btn { color: #e11d48; }
+        .archive-btn .icon-btn { color: #232323; }
+        .reports-btn .icon-btn { color: #3300cc; }
+        .icon-btn:hover { color: #cc0000; }
         pre { background: #23233a; color: #fffde7; border-radius: 8px; padding: 18px; margin-top: 20px; overflow-x: auto; font-size: 1em; white-space: pre-wrap; word-break: break-word; }
         @media (max-width: 900px) { .container { padding: 10px; } li { flex-direction: column; align-items: flex-start; } .button-group { margin-top: 8px; } }
     </style>
@@ -145,7 +132,7 @@ HTML_TEMPLATE = """
                 {% elif archive %}
                     <a class="filename-link" href="/archivefile/{{file}}" target="_blank">{{file}}</a>
                 {% else %}
-                    <a class="filename-link" href="/uploads/{{file}}" target="_blank">{{file}}</a>
+                    <span class="filename-link">{{file}}</span>
                 {% endif %}
                 <div class="button-group">
                 {% if not archive and not reports and file.lower().endswith('.pdf') %}
@@ -159,7 +146,7 @@ HTML_TEMPLATE = """
                             <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" stroke-width="2"/><line x1="8" y1="6" x2="16" y2="6" stroke-width="2"/><line x1="8" y1="10" x2="16" y2="10" stroke-width="2"/><line x1="8" y1="14" x2="12" y2="14" stroke-width="2"/></svg>
                         </button>
                     </form>
-                    <form style="display:inline;" method="post" action="/generate_pdf_image/{{file}}" target="_blank">
+                    <form style="display:inline;" method="post" action="/generate_pdf_image/{{file}}">
                       <button type="submit" title="Generate Preview Images">
                         <svg class="icon-btn" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <rect x="5" y="5" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -580,26 +567,51 @@ def delete_report_file_route(filename):
 def generate_pdf_image(filename):
     src_path = os.path.join(UPLOAD_FOLDER, filename)
     if not os.path.isfile(src_path) or not filename.lower().endswith(".pdf"):
-        return "PDF not found", 404
-    tempdir = tempfile.mkdtemp(prefix="pdfimg_")
-    out_prefix = os.path.join(tempdir, f"{filename}_page")
-    command = ["pdftocairo", "-jpeg", src_path, out_prefix]
-    try:
-        subprocess.run(command, check=True, timeout=120)
-    except Exception as e:
-        return f"Failed to generate images: {e}", 500
-    images = sorted(
-        f for f in os.listdir(tempdir) if f.endswith(".jpg") or f.endswith(".jpeg")
-    )
-    img_html = "".join(
-        f'<div style="margin:14px 0;"><a href="/pdf_imagefile/{os.path.basename(tempdir)}/{img}" target="_blank">{img}</a><br>'
-        f'<img src="/pdf_imagefile/{os.path.basename(tempdir)}/{img}" width="350"></div>'
-        for img in images
-    )
-    return (
-        f"<h2>All Image Previews for {filename}</h2>{img_html}"
-        if images
-        else "No images generated."
+        output = "PDF not found"
+    else:
+        tempdir = tempfile.mkdtemp(prefix="pdfimg_")
+        out_prefix = os.path.join(tempdir, f"{filename}_page")
+        command = ["pdftocairo", "-jpeg", src_path, out_prefix]
+        try:
+            proc = subprocess.run(
+                command,
+                check=True,
+                capture_output=True,
+                universal_newlines=True,
+                timeout=120,
+            )
+            images = sorted(
+                f
+                for f in os.listdir(tempdir)
+                if f.endswith(".jpg") or f.endswith(".jpeg")
+            )
+            if images:
+                img_html = "".join(
+                    f'<div style="margin:14px 0;"><a href="/pdf_imagefile/{os.path.basename(tempdir)}/{img}" target="_blank">{img}</a><br>'
+                    f'<img src="/pdf_imagefile/{os.path.basename(tempdir)}/{img}" width="350"></div>'
+                    for img in images
+                )
+                output = (
+                    f"pdftocairo output:\n{proc.stdout}\n{proc.stderr or ''}\n"
+                    + img_html
+                )
+            else:
+                output = "No images generated."
+        except Exception as e:
+            output = f"Failed to generate images: {e}"
+    files = [
+        f
+        for f in os.listdir(UPLOAD_FOLDER)
+        if os.path.isfile(os.path.join(UPLOAD_FOLDER, f))
+    ]
+    hashes = {f: sha256sum(os.path.join(UPLOAD_FOLDER, f)) for f in files}
+    return render_template_string(
+        HTML_TEMPLATE,
+        files=files,
+        output=output,
+        hashes=hashes,
+        archive=False,
+        reports=False,
     )
 
 
